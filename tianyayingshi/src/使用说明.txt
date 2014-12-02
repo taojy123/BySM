@@ -1,0 +1,54 @@
+-------------------------------------------------
+spider备注：
+
+一、tianya_spider.py
+
+1.在58行写了外层获取的文章数量有5篇时,跳出循环，不再获取
+
+2.Max_Title_Page常量配置外层获取的文章页面数量
+
+二、数据库的相关配置在setting.py     
+
+三、用pipeline.py执行pymong保存数据逻辑，这里用到了scrapy框架中的item
+
+四、打开cmd命令行，运行scrapy项目代码如下（项目在H盘，项目名为tianyayingshi）
+
+H:
+cd H:\tianyayingshi
+scrapy crawl tianyaSpider
+-------------------------------------------------
+数据库备注：
+
+一、数据库安装
+
+1.mongodb安装好后，打开cmd命令行，进入E:/mongodb/bin目录，输入如下的命令启动mongodb服务：
+
+E:
+cd E:/mongodb/bin
+mongod.exe --dbpath E:/mongodb/data/db
+
+2014-11-30T14:20:34.034+0800 [initandlisten] connection accepted from 127.0.0.1:1889 #9 (2 connections now open)
+2014-11-30T14:20:49.814+0800 [conn9] end connection 127.0.0.1:1889 (1 connection now open)
+出现以上提示时，数据库连接成功，但此cmd界面不能关闭。只能再开一个cmd界面运行其他命令
+
+注：mongodb的服务在cmd界面关闭后都要重新启动，加入到windows系统的服务中需要进行一些配置
+
+2.mongodb使用时，需要验证，打开cmd命令行，输入以下内容
+
+mongo admin
+db.addUser('sa','sa')
+
+添加成功后，进行验证
+db.auth('sa','sa')
+
+使用数据库
+use 数据库名
+
+查询数据
+db.表名.find()
+
+限制输出数据条数
+db.表名.find().limit(1)
+
+限制输出数据条数并跳过之前的条数
+db.表名.find().limit(1).skip(1)
