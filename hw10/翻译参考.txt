@@ -1,0 +1,74 @@
+B. (20 points) Inheritance
+（20分）继承。
+This is a multi-part problem in which you will construct several object classes and a short demonstratio program. Submit the entire program as your solution to problem B. Be sure to thoroughly test each part before moving on to the next.
+这是一个多部分的几个问题，你将构建的对象类和相应的短程序。提交你的整个计划解决的问题.一定要彻底测试每个部分之前，移动到下一个在线。
+A used car dealership maintains an inventory of several types and models of vehicles. There are three vehicles: Cars, Trucks and SUVs. Regardless the type, the dealership maintains the following information for every vehicle:
+一种用于汽车经销商的库存维护的车辆类型和模型的研究。车辆有三：汽车，卡车和越野车。无论类型的分销商，每一个车辆维护以下信息：
+? Make
+?使
+? Model
+?模型
+? Year
+?年
+? Mileage
+?里程
+? Price
+?价格
+Additional information is maintained for each individual vehicle depending on its type.
+额外的信息是维护每个单独的车辆根据其类型。
+For Cars: Number of doors (2 or 4)
+用于汽车的门的数量：（2或4）
+For Trucks: Drive type (2-wheel drive or 4-wheel drive)
+卡车型：是驱动（2轮驱动或四轮驱动）
+For SUVs: Passenger Capacity
+在越野车：乘客容量
+Part 1
+第1部分
+Construct a base class named Vehicle to maintain the common vehicle data. The class should include a constructor that will initialize all 5 instance variables and separate accessor and mutator methods for each data attribute.
+本文构建的基础课《普通车辆保持车辆的数据。在类的构造函数将初始化的，应该包括所有实例变量的访问器和5 mutator和单独的每个数据属性的方法。
+Part 2
+第2部分
+Construct three additional classes named Car, Truck and SUV to represent Cars, Trucks, and SUVs respectively. Each of these classes should be derived from the Vehicle class and extend it by adding the attributes unique to the type of vehicle. Each class should provide a constructor to initialize its attribute(s) as well as the attributes of the parent class. Provide accessor and mutator methods for each class to get and set the attributes for the particular class.
+三类结构附加到卡车和SUV——汽车，卡车和SUV车的代表，分别。每个这些类的衍生类应该从车延伸通过添加属性和它独特的类型的车辆。每个类的构造函数来初始化的，应提供其属性（S）和该属性的父类。提供的方法和mutator存取每个类的属性和设置，以获得在特定的类。
+Part 3
+第3部分
+Add a method named Display to each of the four classes to print out the individual vehicle information. For the Vehicle class, the Display method should print the following (one element per line):
+添加到每个显示的方法介绍的四个类别的个人信息到打印出的车辆。在汽车类，显示要打印的方法（一元以下每线）：
+Make: vehicle_make
+组成：车辆_化妆
+Year: vehicle_year
+汽车_岁岁
+Model: vehicle_model
+_模型：模型车
+Miles: vehicle_mileage
+_英里里程的车辆
+Price: vechicle_price
+价格：价格vechicle _
+Each vehicle-type class (Car, Truck, SUV) should print out the information specific to its own type in addition to the vehicle information (Hint: use the superclass Display method). Here is an example of the output for a Car:
+每个车型的类（汽车，卡车，越野车）应打印出它自己的特定类型的信息，除了在车辆信息（提示：使用该方法superclass显示）。这里是一个例子：如果一辆车从输出
+Inventory unit: Car
+单位：汽车库存
+Make: Audi
+组成：奥迪
+Year: 2009
+2009年：
+Model: A8
+模型：A8
+Miles: 40000
+迈尔斯：40000
+Price: 27300.00
+定价：27300.00
+Number of doors: 4
+门数：4
+Part 4
+Part 4
+Write another class named Inventory that will maintain a list of vehicles in inventory. The constructor should start with a Null list. Add the following methods to the Inventory class:
+另一类是写《库存车辆将保持在库存清单。该构造函数应该开始与空列表。下面的方法添加到库存的分类：
+? addVehicle(vehicle) : A mutator that will add the vehicle object to the inventory list
+?addvehicle（车）：是将mutator）的车辆对象的库存清单
+? Display( ) : An accessor that will print out the vehicle information for every vehicle in the inventory. Separate each vehicle's information with two blank lines
+?（一）：显示打印存取车辆，将车辆信息被执行的每一个的库存。每个单独的车辆的信息，和两个空白线
+Part 5
+第5部分
+Finally, write a function named main that will solicit inventory information from the console. The program should prompt the user to enter a vehicle type (car, truck or SUV) and then input all the information appropriate to that vehicle type. It should then construct an appropriate vehicle instance and add it to the inventory. This process should continue until the user indicates he/she is done entering vehicle data. The program should then print out the entire inventory by calling the inventory Display method.
+最后，本文将主要是写的函数，我们的库存信息从控制台。该程序应提示用户进入的车辆（汽车，卡车或SUV车型），然后输入到所有的信息是适当的车辆类型。它应该是适当的：一是车辆和附加到表的实例。这个过程应该继续，直到用户表示他/她做的是进入的车辆数据。然后该程序应该打印出整个库存的库存显示被调用的方法。
