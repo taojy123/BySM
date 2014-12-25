@@ -55,8 +55,8 @@ class TianyaSpider(BaseSpider):
             
             
             
-            # if len(self.title_page_data_list) == 5:
-            #     break
+            if len(self.title_page_data_list) >= 5:
+                break
                 
                 
                 
