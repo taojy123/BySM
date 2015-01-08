@@ -183,7 +183,9 @@ def addKeyWordsField(post):
 
 if __name__ == '__main__':
     i = 0
-    for post in collection.find():
+    ps = collection.find(timeout=False)
+    ps = list(ps)
+    for post in ps:
         print "===================", i, "=========================="
         i += 1
         sentiment_analysis(post)
