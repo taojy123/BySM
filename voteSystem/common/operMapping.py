@@ -1,0 +1,2 @@
+
+OperClassNameList = ['AdminOper']
