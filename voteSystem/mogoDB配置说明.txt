@@ -1,0 +1,35 @@
+数据库备注：
+
+一、数据库安装
+
+1.根据需要修改Install_MongoDB.bat里面的路径后，进行安装，mongodb安装好后，打开cmd命令行，进入安装盘符/mongodb/bin目录，输入如下的命令启动mongodb服务：
+
+E:
+cd E:/mongodb/bin
+mongod.exe --dbpath 安装时配置的dbpath变量
+
+数据库连接成功后，此cmd界面不能关闭。只能再开一个cmd界面运行其他命令
+
+注：mongodb的服务在cmd界面关闭后都要重新启动
+
+2.mongodb使用时，需要验证，打开cmd命令行，输入以下内容
+
+mongo admin
+
+# db.createUser是新版本的mongoDB的添加账号方式，旧版本为db.addUser('sa','sa')
+db.createUser({user:'sa',pwd:'sa',roles:['userAdminAnyDatabase']}) 其中sa是配置的账号和密码
+
+添加成功后，进行验证
+db.auth('sa','sa')
+
+使用数据库
+use 数据库名
+
+查询数据
+db.表名.find()
+
+限制输出数据条数
+db.表名.find().limit(1)
+
+限制输出数据条数并跳过之前的条数
+db.表名.find().limit(1).skip(1)

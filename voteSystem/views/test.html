@@ -1,1 +1,338 @@
-<label>123</label>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>会员管理系统</title>
+
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-table.css" rel="stylesheet"/>
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <link href="/static/css/jquery.searchableSelect.css" rel="stylesheet">
+    <link href="/static/css/menu.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-datetimepicker.css" rel="stylesheet">
+
+    <script src="/static/js/jquery-1.10.2.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap-table.js"></script>
+    <script src="/static/js/jquery.searchableSelect.js"></script>
+    <script src="/static/js/bootstrap-datetimepicker.js"></script>
+    <script src="/static/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+
+    <style>
+        .form-control{
+            display:inline;
+            width:400px;
+        }
+        .form-group{
+            white-space:nowrap;
+        }
+        .form_datetime{
+            width: 120px;
+            float: left;
+        }
+        .navbar-header{
+
+        }
+        .navbar-brand{
+            font-size: 30px;
+            color: #aaa !important;
+        }
+        .navbar-brand:hover{
+            color: #fff !important;
+        }
+        .menu-first{
+            font-size: 20px;
+        }
+        .menu-second a{
+            font-size: 16px !important;
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">会员管理系统</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/">上海长庚家庭服务有限公司版权所有</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-sm-3 col-md-2 sidebar sidebar-menu">
+
+            <a href="#menu1" class="nav-header menu-first collapsed" data-toggle="collapse">会员签到</a>
+            <ul id="menu1" class="nav nav-list collapse menu-second">
+                <li><a href="/sign/">签到</a></li>
+                <li><a href="/signs/">签到记录列表</a></li>
+            </ul>
+
+            <a href="#nenu2" class="nav-header menu-first collapsed" data-toggle="collapse">会员信息管理</a>
+            <ul id="nenu2" class="nav nav-list collapse menu-second">
+                <li><a href="/members/">会员管理</a></li>
+                <li><a href="/members/exited/">退出会员列表</a></li>
+            </ul>
+
+            <a href="#nenu3" class="nav-header menu-first collapsed" data-toggle="collapse">服务管理</a>
+            <ul id="nenu3" class="nav nav-list collapse menu-second">
+                <li><a href="/service_purchases/">服务购买记录</a></li>
+                <li><a href="/services/">服务设定</a></li>
+                <li><a href="/charge/">会员充值</a></li>
+                <li><a href="/services/purchase/">购买服务</a></li>
+            </ul>
+
+            <a href="#nenu7" class="nav-header menu-first collapsed" data-toggle="collapse">套餐管理</a>
+            <ul id="nenu7" class="nav nav-list collapse menu-second">
+                <li><a href="/packages/">套餐设定</a></li>
+                <li><a href="/packages/purchase/">购买套餐</a></li>
+                <li><a href="/package_purchases/">套餐购买记录</a></li>
+            </ul>
+
+            <a href="#nenu4" class="nav-header menu-first collapsed" data-toggle="collapse">积分管理</a>
+            <ul id="nenu4" class="nav nav-list collapse menu-second">
+                <li><a href="/gift_purchases/">积分兑换记录</a></li>
+                <li><a href="/gifts/purchase/">兑换礼品</a></li>
+            </ul>
+
+            <a href="#nenu5" class="nav-header menu-first collapsed" data-toggle="collapse">礼品管理</a>
+            <ul id="nenu5" class="nav nav-list collapse menu-second">
+                <li><a href="/gift_purchases/">积分兑换记录</a></li>
+                <li><a href="/gifts/">礼品设定</a></li>
+                <li><a href="/gifts/input/">礼品补货</a></li>
+                <li><a href="/gifts/purchase/">兑换礼品</a></li>
+            </ul>
+
+            <a href="#nenu6" class="nav-header menu-first collapsed" data-toggle="collapse">系统</a>
+            <ul id="nenu6" class="nav nav-list collapse menu-second">
+                <li class="staff_required"><a href="/users/">员工设定</a></li>
+
+
+                    <li><a href="/password/">修改密码</a></li>
+                    <li><a href="/logout/">退出登录</a></li>
+
+            </ul>
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+
+    <h2 class="sub-header">会员管理</h2>
+
+    <form action="." method="get" class="form-horizontal">
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" ></label>
+            <input type="text" class="form-control" name="keyword" value="">
+            <button type="submit" class="btn btn-success" >查找</button>
+        </div>
+
+
+    </form>
+
+    <table id="table" data-page-size="50" data-page-list="[10,50,500,2000,10000]" data-pagination="true">
+        <thead>
+            <tr>
+                <th data-sortable="true">照片</th>
+                <th data-sortable="true">姓名</th>
+                <th data-sortable="true">卡号</th>
+                <th data-sortable="true">性别</th>
+                <th data-sortable="true">年龄</th>
+                <th data-sortable="true">积分</th>
+                <th data-sortable="true">余额</th>
+                <th data-sortable="true">注册时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+
+                <tr >
+                    <td><img src="" height="30"/></td>
+                    <td>是否</td>
+                    <td>0006801771</td>
+                    <td>男</td>
+                    <td>26岁</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>2016-08-03 09:45</td>
+                    <td>
+                        <a class="staff_required btn btn-xs btn-primary" href="/members/9/" >编辑</a>
+                        <a class="staff_required btn btn-xs btn-danger exit" data-id="9">退出</a>
+                    </td>
+                </tr>
+
+                <tr >
+                    <td><img src="" height="30"/></td>
+                    <td>说说</td>
+                    <td>1234567866</td>
+                    <td>男</td>
+                    <td>27岁</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>2016-08-03 09:36</td>
+                    <td>
+                        <a class="staff_required btn btn-xs btn-primary" href="/members/8/" >编辑</a>
+                        <a class="staff_required btn btn-xs btn-danger exit" data-id="8">退出</a>
+                    </td>
+                </tr>
+
+                <tr >
+                    <td><img src="/static/media/header/3.jpg" height="30"/></td>
+                    <td>赵六</td>
+                    <td>0006803584</td>
+                    <td>女</td>
+                    <td>62岁</td>
+                    <td>7</td>
+                    <td>2083</td>
+                    <td>2016-07-08 16:10</td>
+                    <td>
+                        <a class="staff_required btn btn-xs btn-primary" href="/members/4/" >编辑</a>
+                        <a class="staff_required btn btn-xs btn-danger exit" data-id="4">退出</a>
+                    </td>
+                </tr>
+
+                <tr >
+                    <td><img src="/static/media/header/2.jpg" height="30"/></td>
+                    <td>王五</td>
+                    <td>0006801772</td>
+                    <td>男</td>
+                    <td>56岁</td>
+                    <td>4</td>
+                    <td>0</td>
+                    <td>2016-07-08 16:07</td>
+                    <td>
+                        <a class="staff_required btn btn-xs btn-primary" href="/members/3/" >编辑</a>
+                        <a class="staff_required btn btn-xs btn-danger exit" data-id="3">退出</a>
+                    </td>
+                </tr>
+
+                <tr >
+                    <td><img src="/static/media/header/1.jpg" height="30"/></td>
+                    <td>李四</td>
+                    <td>0006821237</td>
+                    <td>男</td>
+                    <td>67岁</td>
+                    <td>9</td>
+                    <td>118</td>
+                    <td>2016-07-08 15:59</td>
+                    <td>
+                        <a class="staff_required btn btn-xs btn-primary" href="/members/2/" >编辑</a>
+                        <a class="staff_required btn btn-xs btn-danger exit" data-id="2">退出</a>
+                    </td>
+                </tr>
+
+                <tr >
+                    <td><img src="/static/media/header/4.jpg" height="30"/></td>
+                    <td>张三</td>
+                    <td>0006819719</td>
+                    <td>女</td>
+                    <td>83岁</td>
+                    <td>3</td>
+                    <td>412</td>
+                    <td>2016-07-08 15:48</td>
+                    <td>
+                        <a class="staff_required btn btn-xs btn-primary" href="/members/1/" >编辑</a>
+                        <a class="staff_required btn btn-xs btn-danger exit" data-id="1">退出</a>
+                    </td>
+                </tr>
+
+        </tbody>
+    </table>
+
+    有效会员人数:6
+    退出会员人数:2
+
+    <br/>
+    <br/>
+    <form class="output" action="/output/" method="post" onsubmit="$(this).find('.data').val($('#table').html());">
+        <input type="hidden" name="data" class="data"/>
+        <input type="hidden" name="begin_index" value="1"/>
+        <input type="hidden" name="end_index" value="-1"/>
+        <button type="submit" class="btn btn-success">导出表格</button>
+    </form>
+
+    <br/>
+    <a class="btn btn-warning" href="/members/add/">添加会员 +</a>
+
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $('.search').searchableSelect();
+
+    $(".form_datetime").datetimepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        todayBtn: true,
+        minView: 2,
+        language: 'zh-CN'
+    });
+</script>
+
+
+    <script>
+        $('#table').bootstrapTable();
+
+        $("#members").addClass('active');
+
+        $(".exit").click(function () {
+            var id = $(this).attr('data-id');
+            var reason = prompt('请输入退出原因:');
+            if(reason){
+                top.location.href = '/members/' + id + '/delete/?reason=' + reason;
+            }
+        });
+
+    </script>
+
+
+</body>
+</html>

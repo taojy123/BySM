@@ -1,0 +1,77 @@
+% rebase('views/adminBase.html')
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+
+    <h2 class="sub-header">评委管理</h2>
+
+    <a class="col-sm-0 btn btn-warning" href="/admin/addVoter/">添加评委 +</a>
+    <br/>
+    <br/>
+    <form class="col-sm-0 output" action="/output/" method="post" onsubmit="$(this).find('.data').val($('#table').html());">
+        <input type="hidden" name="data" class="data"/>
+        <input type="hidden" name="begin_index" value="1"/>
+        <input type="hidden" name="end_index" value="-1"/>
+        <button type="submit" class="btn btn-success">导出表格</button>
+    </form>
+    <br/>
+    <form action="/admin/findVoterData" method="get" class="col-sm-1 form-horizontal">
+
+        <div class="form-group">
+            <label  class="col-sm-0 control-label" ></label>
+            % if 'keyword' not in dir():
+            %   keyword = ''
+            % end
+            <input type="text" class="form-control" name="keyword" value="{{keyword}}">
+            <button type="submit" class="btn btn-success" >查找</button>
+        </div>
+
+    </form>
+
+    <table id="table" data-page-size="50" class="table table-hover" data-pagination="true" data-page-list="[10,50,500,2000,10000]" data-pagination="true">
+        <thead>
+            <tr>
+                <th data-sortable="true">账号</th>
+                <th data-sortable="true">密码</th>
+                <th data-sortable="true">姓名</th>
+                <th data-sortable="true">注册时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+                % index = 0
+                % for voterData in dataList:
+                <tr>
+                    <td data-sortable="true">{{voterData['userAcc']}}</td>
+                    <td data-sortable="true">{{voterData['userPsw']}}</td>
+                    <td data-sortable="true">{{voterData['userName']}}</td>
+                    <td data-sortable="true" id="regTime{{index}}">
+                        <script>
+                            var time = serverMilliSecToStr({{voterData['regTime']}});
+                            document.getElementById("regTime{{index}}").innerHTML = time;
+                            console.log(time.length)
+                        </script>
+                    </td>
+                    <td>
+                        <a class="btn btn-xs btn-primary" href="/admin/editVoter?editVoter={{voterData['userAcc']}}" >编辑</a>
+                        <a class="btn btn-xs btn-danger exit" data-id="{{voterData['userAcc']}}">删除</a>
+                    </td>
+
+                </tr>
+                %   index += 1
+                % end
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+        $("#userInfoMgr").addClass('active')
+        $(".exit").click(function () {
+            var id = $(this).attr('data-id');
+            var result = confirm('确认删除该评委账号吗？');
+            if(result){
+                top.location.href = '/admin/deleteVoterData?userAcc='+id;
+            }
+        });
+</script>

@@ -36,5 +36,8 @@ def GetConfig(fileName):
     return g_config[fileName]
 
 def GetSystemConfig():
-    return GetConfig('systemConfig.ini')
+    return GetConfig('config/systemConfig.ini')
+
+def GetDBConfig():
+    return GetConfig('config/dbConfig.ini')
 

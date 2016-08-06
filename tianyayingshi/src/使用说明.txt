@@ -25,7 +25,7 @@ scrapy crawl tianyaSpider
 
 E:
 cd E:/mongodb/bin
-mongod.exe --dbpath E:/mongodb/data/db
+mongod.exe --dbpath E:/mongodb/data
 
 2014-11-30T14:20:34.034+0800 [initandlisten] connection accepted from 127.0.0.1:1889 #9 (2 connections now open)
 2014-11-30T14:20:49.814+0800 [conn9] end connection 127.0.0.1:1889 (1 connection now open)
