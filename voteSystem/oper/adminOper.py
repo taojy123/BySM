@@ -4,6 +4,15 @@ from bottle import redirect
 from dao.userAccDao import UserAccDao
 from common import shareDefine, commonFunc, mongoDBCtrl
 
+
+def validate_admin_login_decorator(fun):
+    def wrapper(self, request, *args, **kwargs):
+        if not self.validateAdminLogin(request):
+            return self.redirectLogin()
+        return fun(self, request, *args, **kwargs)
+    return wrapper
+
+
 class AdminOper(OperBase):
     def __init__(self):
         OperBase.__init__(self)
@@ -54,10 +63,8 @@ class AdminOper(OperBase):
     def redirectLogin(self):
         return redirect('/admin/adminLogin')
 
+    @validate_admin_login_decorator
     def addVoter(self, request):
-        if not self.validateAdminLogin(request):
-            return self.redirectLogin()
-
         return self.responseTemplate()
 
     def addVoterData(self, request):
@@ -84,10 +91,8 @@ class AdminOper(OperBase):
 
         return self.voterMgr(request)
 
+    @validate_admin_login_decorator
     def editVoter(self, request):
-        if not self.validateAdminLogin(request):
-            return self.redirectLogin()
-
         voterAcc = request.GET.get('editVoter')
         userAccDao = UserAccDao(voterAcc)
         if not userAccDao.hasData():
@@ -95,10 +100,8 @@ class AdminOper(OperBase):
 
         return self.responseTemplate(userAccDao=userAccDao)
 
+    @validate_admin_login_decorator
     def editVoterData(self, request):
-        if not self.validateAdminLogin(request):
-            return self.redirectLogin()
-
         userName = request.forms.get('voterName')
         voterPsw = request.forms.get('voterPsw')
         if userName and voterPsw:
@@ -116,10 +119,8 @@ class AdminOper(OperBase):
 
         return self.voterMgr(request)
 
+    @validate_admin_login_decorator
     def deleteVoterData(self, request):
-        if not self.validateAdminLogin(request):
-            return self.redirectLogin()
-
         userAcc = request.GET.get('userAcc')
         userAccDao = UserAccDao(userAcc)
         if userAccDao.hasData():
@@ -127,10 +128,8 @@ class AdminOper(OperBase):
 
         return self.voterMgr(request)
 
+    @validate_admin_login_decorator
     def findVoterData(self, request):
-        if not self.validateAdminLogin(request):
-            return self.redirectLogin()
-
         keyword = request.GET.get('keyword')
         if not keyword:
             return self.voterMgr(request)
