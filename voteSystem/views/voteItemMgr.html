@@ -2,44 +2,112 @@
 
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
-            
-    <h2 class="sub-header">登录</h2>
+    <h2 class="sub-header">投票项目管理</h2>
 
-    
-
-    <form id="form" action="./adminLoginValidate" method="POST" class="form-horizontal">
-
-        <input type="hidden" name="next" value="/customers/">
-
-        <div class="form-group">
-            <label  class="col-sm-2 control-label" >用户名:</label>
-            <input type="text" class="form-control"  style="display:inline;width:auto;" name="username" >
-            <label class="alert alert-danger control-label" id="userNameValidate" hidden="true"></label>
-        </div>
-
-        <div class="form-group">
-            <label  class="col-sm-2 control-label" >密码:</label>
-            <input type="password" class="form-control"  style="display:inline;width:auto;" name="password" >
-            <label class="alert alert-danger control-label" id="passwordValiDate" hidden="true"></label>
-        </div>
+    <a class="col-sm-0 btn btn-warning" href="/admin/addVoteItem/">添加项目管理 +</a>
+    <br/>
+    <br/>
+    <form class="col-sm-0 output" action="/output/" method="post" onsubmit="$(this).find('.data').val($('#table').html());">
+        <input type="hidden" name="data" class="data"/>
+        <!--<input type="hidden" name="begin_index" value="1"/>-->
+        <!--<input type="hidden" name="end_index" value="-1"/>-->
+        <button type="submit" class="btn btn-success">导出表格</button>
+    </form>
+    <br/>
+    <form action="/admin/findVoterData" method="get" class="col-sm-1 form-horizontal">
 
         <div class="form-group">
-            <label  class="col-sm-2 control-label" ></label>
-            <button type="submit" class="btn btn-success" onclick="return valiDateNameAndPsw()">登录</button>
+            <label  class="col-sm-0 control-label" ></label>
+            % if 'keyword' not in dir():
+            %   keyword = ''
+            % end
+            <input type="text" class="form-control" name="keyword" value="{{keyword}}">
+            <button type="submit" class="btn btn-success" >查找</button>
         </div>
+
     </form>
 
+    <table id="table" data-page-size="50" class="table table-hover" data-pagination="true" data-page-list="[10,50,500,2000,10000]" data-pagination="true">
+        <thead>
+            <tr>
+                <th data-sortable="true">立项时间</th>
+                <th data-sortable="true">年度</th>
+                <th data-sortable="true">投票项目名称</th>
+                <th data-sortable="true">评委持票数</th>
+                <th data-sortable="true">投票通过指标</th>
+                <th data-sortable="true">是否匿名投票</th>
+                <th data-sortable="true">评委列表</th>
+                <th data-sortable="true">参评人列表</th>
+                <th data-sortable="true">截止时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+                % for voteItemData in dataList:
+                    <tr>
+                        <td data-sortable="true" id="addVoteTime{{voteItemData['Primary']}}">
+                            <script>
+                                var time = serverMilliSecToStr('{{voteItemData["addVoteTime"]}}');
+                                $('#addVoteTime{{voteItemData["Primary"]}}').html(time);
+                            </script>
+                        </td>
+                        <td data-sortable="true">{{voteItemData['year']}}</td>
+                        <td data-sortable="true">{{voteItemData['name']}}</td>
+                        <td data-sortable="true">{{voteItemData['voterTicketCnt']}}</td>
+                        <td data-sortable="true">{{voteItemData['beVoterPassCnt']}}</td>
+                        <td data-sortable="true">
+                            % if voteItemData['isUnSign'] == 1:
+                                是
+                            % else:
+                                否
+                            % end
+                        </td>
+                        <td data-sortable="true">
+                            <select class="form-control" name="isUnSign">
+                                % for index, voterName in enumerate(voterNameDict[voteItemData['Primary']]):
+                                % if index == 0:
+                                    <option selected>{{voterName}}</option>
+                                % else:
+                                    <option>{{voterName}}</option>
+                                % end
+                                % end
+                            </select>
+                        </td>
+                        <td data-sortable="true">
+                            <select class="form-control" name="isUnSign">
+                                % for index, voterName in enumerate(beVoterNameDict[voteItemData['Primary']]):
+                                % if index == 0:
+                                    <option selected>{{voterName}}</option>
+                                % else:
+                                    <option>{{voterName}}</option>
+                                % end
+                                % end
+                            </select>
+                        </td>
+                        <td data-sortable="true" id="endTime{{voteItemData['Primary']}}">
+                            <script>
+                                var time = serverMilliSecToStr('{{voteItemData["endTime"]}}');
+                                $("#endTime{{voteItemData['Primary']}}").html(time);
+                            </script>
+                        </td>
+                        <td data-sortable="true">
+                            <a class="btn btn-xs btn-primary" href="/admin/editVoteItem?primary={{voteItemData['Primary']}}" >编辑</a>
+                            <a class="btn btn-xs btn-danger exit" data-id="{{voteItemData['Primary']}}">删除</a>
+                        </td>
+                    </tr>
+                % end
+        </tbody>
+    </table>
 
-    <script>
-        $("#login").addClass('active')
-    </script>
-        % if 'loginSuccess' in dir() and loginSuccess == False:
-            <div class="alert alert-danger" id="validateError">用户名或密码错误</div>
-            <script>
-                var delayHidden = function(){
-                    setTimeout('document.getElementById("validateError").hidden = true', 3000);
-                }
-                delayHidden()
-            </script>
-        % end
-        </div>
+</div>
+
+<script>
+        $("#userInfoMgr").addClass('active')
+        $(".exit").click(function () {
+            var id = $(this).attr('data-id');
+            var result = confirm('确认删除该投票项目吗？');
+            if(result){
+                top.location.href = '/admin/deleteVoteItem?primary=' + id;
+            }
+        });
+</script>

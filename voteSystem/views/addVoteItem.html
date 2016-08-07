@@ -1,0 +1,254 @@
+% rebase('views/adminBase.html')
+
+% import datetime
+% now = datetime.datetime.now()
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+
+    <h2 class="sub-header">
+            添加投票项目
+    </h2>
+
+    <div class="alert alert-info" hidden="true" id="alertInfo"></div>
+
+    <form action="/admin/addVoteItemData" method="POST" class="form-horizontal" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label">年份</label>
+            <input type="text" class="form-control" id="year" name="year" value="" maxlength="4">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >投票项目名称</label>
+            <input type="text" class="form-control" id="voteItemName" name="name" value="">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >评委持票数</label>
+            <input type="text" class="form-control" id="voterTicketCnt" name="voterTicketCnt" value="">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >投票通过指标</label>
+            <input type="text" class="form-control" id="beVoterPassCnt" name="beVoterPassCnt" value="">
+        </div>
+
+        <div class="form-group">
+                <label  class="col-sm-2 control-label" >是否匿名投票</label>
+                <select class="form-control" name="isUnSign">
+                    <option value='1' selected>是</option>
+                    <option value='0'>否</option>
+                </select>
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >已选评委</label>
+            <div id="selectedVoterList"><label class="control-label col-sm-1" style="text-align: left" id="noSelected">未选择</label></div>
+        </div>
+
+        <input type="hidden" value="" id="voterListStr" name="voterListStr"/>
+
+        <div class="form-group">
+            <label class="col-sm-2"></label>
+            <a class="btn btn-primary" id="selectVoter">显示选择评委</a>
+        </div>
+
+        <div class="form-group" id="voterSearch" hidden="true">
+            <label class="col-sm-2"></label>
+            <div class="col-sm-10">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="keyword_0" value="">
+                    <a class="btn btn-success" id="keyVoterSearch">查找</a>
+                </div>
+                <div id="voterSearchResult">加载数据中…</div>
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >已选参评人</label>
+            <div id="selectedBeVoterList"><label class="control-label col-sm-1" style="text-align: left" id="beVoterNoSelected">未选择</label></div>
+        </div>
+
+        <input type="hidden" value="" id="beVoterListStr"  name="beVoterListStr"/>
+
+        <div class="form-group">
+            <label class="col-sm-2"></label>
+            <a class="btn btn-primary" id="selectBeVoter">显示选择参评人</a>
+        </div>
+
+        <div class="form-group" id="beVoterSearch" hidden="true">
+            <label class="col-sm-2"></label>
+            <div class="col-sm-10">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="keyword_1" value="">
+                    <a class="btn btn-success" id="keyBeVoterSearch">查找</a>
+                </div>
+                <div id="beVoterSearchResult">加载数据中…</div>
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >投票截止时间</label>
+            <input type="text" class="form-control" id="endTime" name="endTime" value="" maxlength="10" placeholder="格式 yyyy-mm-dd">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >备注</label>
+            <textarea class="form-control" name="remark" style="width: 60%;" maxlength="200"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label"></label>
+            <button type="submit" class="btn btn-success" onclick="return addVoteItemValidate()">提交</button>
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+    var sendSearchAjax = function(userType, keyword){
+        var keywordStr = '';
+
+        if(keyword){
+            keywordStr = '&keyword='+keyword;
+        }
+
+        $.ajax({
+                    url:"/admin/findVoterAjax?userType="+userType+keywordStr,
+                    success:function(data){
+                        var idName = '';
+                        if(userType == 0) idName = "#voterSearchResult";
+                        else idName = "#beVoterSearchResult";
+
+                        $(idName).html(data);
+                    }
+                });
+    };
+
+    $('#selectVoter').click(
+        function(){
+            $('#voterSearch').attr('hidden', !$('#voterSearch').attr('hidden'));
+            if(!$('#voterSearch').attr('hidden')){
+                sendSearchAjax(0);
+                $(this).text('隐藏选择评委');
+            }else{
+                $(this).text('显示选择评委');
+            }
+        }
+    );
+
+    $('#keyVoterSearch').click(function(){
+        var keyword = $('#keyword_0').val();
+        sendSearchAjax(0, keyword);
+    });
+
+    $('#selectBeVoter').click(
+        function(){
+            $('#beVoterSearch').attr('hidden', !$('#beVoterSearch').attr('hidden'));
+            if(!$('#beVoterSearch').attr('hidden')){
+                sendSearchAjax(1);
+                $(this).text('隐藏选择参评人');
+            }else{
+                $(this).text('显示选择参评人');
+            }
+        }
+    );
+
+    $('#keyBeVoterSearch').click(function(){
+        var keyword = $('#keyword_1').val();
+        sendSearchAjax(1, keyword);
+    });
+
+    var addVoteItemValidate = function(){
+        var year = $('#year').val();
+        var yearLength = year.length;
+        var isString = isNaN(year);
+        if(yearLength != 4 || isString){
+            showAffirm('请输入4位年份数字');
+            return false;
+        }
+
+        if(!checkNoInput('#voteItemName', '投票项目名称')) return false;
+        if(!checkNoInput('#voterTicketCnt', '评委持票数', true)) return false;
+        if(!checkNoInput('#beVoterPassCnt', '投票通过指标', true)) return false;
+
+        if(!accListPro('#selectedVoterList', '#voterListStr', '请选择评委')) return false;
+        if(!accListPro('#selectedBeVoterList', '#beVoterListStr', '请选择参评人')) return false;
+
+        if(!dateValidate()) return false;
+
+        return true;
+    }
+
+    var accListPro = function(id, tagID, affirm){
+        var accList = selectedAccList(id);
+        if(accList.length < 1){
+            showAffirm(affirm);
+            return false;
+        }else $(tagID).attr('value', accList.join('_'));
+
+        return true;
+    }
+
+    var checkNoInput = function(id, affirmName, checkIsNaN){
+        var value = $(id).val();
+        var valueLen = value.length;
+
+        if(!valueLen){
+            showAffirm('请输入' + affirmName);
+            return false;
+        }
+
+        if(checkIsNaN){
+            var isString = isNaN(value);
+            if(isString){
+                showAffirm(affirmName + '请输入数字');
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    var showAffirm = function(affirm){
+        if(!affirm) return;
+        $('#alertInfo').attr('hidden', false);
+        $('#alertInfo').html(affirm);
+    }
+
+    var selectedAccList = function(id){
+        var children = $(id).children();
+        var accList = [];
+        for(var i = 0;i<children.length;i++){
+            var child = children[i];
+            if(child.nodeName == 'A'){
+                accList.push(child.name);
+            }
+        }
+        return accList;
+    }
+
+    var dateValidate = function(){
+        if(!checkNoInput('#endTime', '请输入时间')) return false;
+        var dateStr = $('#endTime').val();
+        var regExp = /^(\d{4})\-(\d{2})\-(\d{2})$/;
+
+        if(!regExp.test(dateStr)){
+            showAffirm('截止日期格式请按照yyyy-mm-dd格式输入');
+            return false;
+        }
+
+        var year = dateStr.split('-')[0];
+        if(year < 1970){
+            showAffirm('年份不能小于1970年');
+            return false;
+        }
+
+        return true;
+    };
+
+</script>

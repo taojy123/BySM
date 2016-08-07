@@ -65,6 +65,10 @@ class DaoBase():
         self._hasData = True
         return
 
+    def setPrimary(self, primary):
+        self._primay = primary
+        return
+
     def saveData(self):
         saveDict = {}
         saveDict['Primary'] = self._primay

@@ -1,0 +1,114 @@
+% from common import shareDefine
+
+% if userType == shareDefine.UserAccType_BeVoter:
+%   adminName = '参评人'
+%   selectedVoterList = '#selectedBeVoterList'
+%   noSelected = '#beVoterNoSelected'
+%   removeVoter = '.removeVoter'
+%   addVoter = 'addBeVoter'
+% else:
+%   adminName = '评委'
+%   selectedVoterList = '#selectedVoterList'
+%   noSelected = '#noSelected'
+%   removeVoter = '.removeVoter'
+%   addVoter = 'addVoter'
+% end
+
+<table data-page-size="5" class="table table-hover" data-page-list="[5,10,20,50,100]">
+                    <thead>
+                        <tr>
+                            <th data-sortable="true">{{adminName}}账号</th>
+                            <th data-sortable="true">{{adminName}}姓名</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            % index = 0
+                            % for voterData in dataList:
+                                <tr>
+                                    <td data-sortable="true">{{voterData['userAcc']}}</td>
+                                    <td data-sortable="true">{{voterData['userName']}}</td>
+                                    <td><a class="btn btn-xs btn-primary {{addVoter}}" data-id="{{voterData['userAcc']}}_{{voterData['userName']}}">添加</a></td>
+                                </tr>
+                            % end
+                    </tbody>
+</table>
+
+<script>
+    $('.{{addVoter}}').click(function(){
+        var id = $(this).attr('data-id');
+        var userAcc = id.split('_')[0];
+
+        if(isAccSelected(userAcc)){
+            alert('已添加该{{adminName}}')
+            return;
+        }
+
+        var userName = id.split('_')[1];
+        if(userName == '') userName = '未设置名字';
+
+        var addNode = '<a class="btn btn-xs btn-primary removeVoter" name="' + userAcc + '" style="margin-right: 3px">' + userName + '</a>';
+        $('{{selectedVoterList}}').append(addNode);
+        $('{{noSelected}}').attr('hidden', true);
+
+        $('{{removeVoter}}').click(function(){
+            $(this).remove();
+           if($('{{selectedVoterList}}').children().length == 1) $('{{noSelected}}').attr('hidden', false);
+
+        });
+
+    });
+
+    var isAccSelected = function(accName){
+        var accList = selectedAccList('{{selectedVoterList}}');
+        for(var i=0;i<accList.length;i++){
+            var acc = accList[i];
+            if(acc == accName) return true;
+        }
+        return false;
+    } ;
+
+    var selectedAccList = function(id){
+        var children = $(id).children();
+        var accList = [];
+        for(var i = 0;i<children.length;i++){
+            var child = children[i];
+            if(child.nodeName == 'A'){
+                accList.push(child.name);
+            }
+        }
+        return accList;
+    }
+</script>
+
+<!--
+
+<div class="fixed-table-pagination">
+    <div class="pull-left pagination-detail">
+        <span class="pagination-info">显示第 1 到 10 条, 总计 38 条记录</span>
+        <span class="page-list"><span class="btn-group dropup">
+            <button type="button" class="btn btn-default  dropdown-toggle" data-toggle="dropdown">
+                <span class="page-size">10</span>
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li class="active"><a href="javascript:void(0)">10</a></li>
+                <li><a href="javascript:void(0)">50</a></li>
+            </ul>
+        </span> 条每页</span>
+    </div>
+    <div class="pull-right pagination">
+        <ul class="pagination">
+            <li class="page-first disabled"><a href="javascript:void(0)">&lt;&lt;</a></li>
+            <li class="page-pre disabled"><a href="javascript:void(0)">&lt;</a></li>
+            <li class="page-number active"><a href="javascript:void(0)">1</a></li>
+            <li class="page-number"><a href="javascript:void(0)">2</a></li>
+            <li class="page-number"><a href="javascript:void(0)">3</a></li>
+            <li class="page-number"><a href="javascript:void(0)">4</a></li>
+            <li class="page-next"><a href="javascript:void(0)">&gt;</a></li>
+            <li class="page-last"><a href="javascript:void(0)">&gt;&gt;</a></li>
+        </ul>
+    </div>
+</div>
+
+-->

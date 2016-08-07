@@ -13,3 +13,16 @@ def GetRandomStr(randomlength=configReader.GetSystemConfig().randomPswLen):
     for i in range(randomlength):
         str += chars[random.randint(0, length)]
     return str
+
+def GetNumberFromString(str):
+    value = None
+    try:
+        value = int(str)
+    except:
+        pass
+    return value
+
+def GetIntMillisecondByFormatStr(timeStr):
+    timeArray = time.strptime(timeStr, "%Y-%m-%d")
+    timeStamp = int(time.mktime(timeArray))
+    return timeStamp

@@ -1,9 +1,11 @@
+# coding:GBK
+
 from operBase import OperBase
 from common.configReader import GetSystemConfig
 from bottle import redirect
 from dao.userAccDao import UserAccDao
+from dao.voteItemDao import VoteItemDao
 from common import shareDefine, commonFunc, mongoDBCtrl
-
 
 def validate_admin_login_decorator(fun):
     def wrapper(self, request, *args, **kwargs):
@@ -166,9 +168,9 @@ class AdminOper(OperBase):
         if colDataList.count() > 0:
             colDataList.sort("regTime", -1)
 
-        return self.voterMgr(request, False, userType, colDataList)
+        return self.voterMgr(request, False, userType, colDataList, keyword)
 
-    def voterMgr(self, request, validate=True, userType=shareDefine.UserAccType_Voter, colDataList=None):
+    def voterMgr(self, request, validate=True, userType=shareDefine.UserAccType_Voter, colDataList=None, keyword=''):
         if validate and not self.validateAdminLogin(request):
             return self.redirectLogin()
 
@@ -177,7 +179,95 @@ class AdminOper(OperBase):
             if colDataList.count() > 0:
                 colDataList.sort("regTime", -1)
 
-        return self.responseTemplate(userType=userType, dataList=list(colDataList))
+        return self.responseTemplate(userType=userType, dataList=list(colDataList), keyword=keyword)
 
     def beVoterMgr(self, request, validate=True):
         return self.voterMgr(request, validate=validate, userType=shareDefine.UserAccType_BeVoter)
+
+    def voteItemMgr(self, request, validate=True, colDataList=None):
+        if validate and not self.validateAdminLogin(request):
+            return self.redirectLogin()
+
+        if not colDataList:
+            colDataList = mongoDBCtrl.SearchData('VoteItemDao')
+            if colDataList.count() > 0:
+                colDataList.sort("addVoteTime", -1)
+
+        voterNameDict = {}
+        beVoterNameDict = {}
+        if colDataList.count() > 0:
+            col = mongoDBCtrl.GetDataCol('UserAccDao')
+            colDataList2 = mongoDBCtrl.SearchData('VoteItemDao')
+            for colData in colDataList2:
+                beVoterNameList = []
+                for beVoterAcc in colData['beVoterInfoDict'].iterkeys():
+                    accColData = col.find_one({'userAcc':beVoterAcc})
+                    if accColData:
+                        beVoterNameList.append(accColData['userName'])
+                beVoterNameDict[colData['Primary']] = beVoterNameList
+
+                voterNameList = []
+                for voterAcc in colData['voterInfoDict'].iterkeys():
+                    accColData = col.find_one({'userAcc':voterAcc})
+                    if accColData:
+                        voterNameList.append(accColData['userName'])
+                voterNameDict[colData['Primary']] = voterNameList
+
+        return self.responseTemplate(dataList=list(colDataList), voterNameDict=voterNameDict, beVoterNameDict=beVoterNameDict)
+
+    @validate_admin_login_decorator
+    def addVoteItem(self, request):
+        return self.responseTemplate()
+
+    @validate_admin_login_decorator
+    def findVoterAjax(self, request):
+        userType = self.getIntUserType(request, False);
+        keyword = request.GET.get('keyword')
+
+        if keyword == None:
+            searchDict = {'userType': userType}
+        else:
+            searchDict = {'$or': [{'Primary': {'$regex': keyword}}, {'userName': {'$regex': keyword}}], 'userType': userType}
+
+        col = mongoDBCtrl.GetDataCol('UserAccDao')
+        colDataList = col.find(searchDict)
+
+        if colDataList.count() > 0:
+            colDataList.sort("regTime", -1)
+
+        return self.responseTemplate(dataList=list(colDataList), userType=userType)
+
+    @validate_admin_login_decorator
+    def addVoteItemData(self, request):
+        voteItemData = VoteItemDao(0)
+        voteItemData.year = request.POST.get('year')
+        voteItemData.name = request.POST.get('name')
+        voteItemData.voterTicketCnt = request.POST.get('voterTicketCnt')
+        voteItemData.beVoterPassCnt = request.POST.get('beVoterPassCnt')
+        voteItemData.isUnSign = request.POST.get('isUnSign')
+        remark = request.POST.get('remark')
+        if len(remark) > 200:
+            remark = remark[:200]
+        voteItemData.remark = remark
+        voteItemData.addVoteTime = commonFunc.GetIntMillisecond()
+        voteItemData.setPrimary(self.getNextSeq('VoteItemSeq'))
+
+        voterInfoDict = {}
+        voterListStr = request.POST.get('voterListStr')
+        for voterAcc in voterListStr.split('_'):
+            voterDetailDict = {'voterLeftTicket':int(request.POST.get('voterTicketCnt')), 'voteRec':{}}
+            voterInfoDict[voterAcc] = voterDetailDict
+
+        beVoterInfoDict = {}
+        beVoterListStr = request.POST.get('beVoterListStr')
+        for beVoterAcc in beVoterListStr.split('_'):
+            beVoterInfoDict[beVoterAcc] = 0
+
+        endTime = commonFunc.GetIntMillisecondByFormatStr(request.POST.get('endTime'))
+
+        voteItemData.endTime = endTime
+        voteItemData.voterInfoDict = voterInfoDict
+        voteItemData.beVoterInfoDict = beVoterInfoDict
+        voteItemData.saveData()
+
+        return self.voteItemMgr(request)
