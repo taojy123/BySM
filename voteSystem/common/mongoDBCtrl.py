@@ -14,6 +14,6 @@ def GetDataCol(tableName):
 
     return col
 
-def SearchData(tableName):
+def SearchData(tableName, condition={}):
     col = GetDataCol(tableName)
-    return col.find()
+    return col.find(condition)

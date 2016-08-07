@@ -1,15 +1,25 @@
 % rebase('views/adminBase.html')
 
+% from common import shareDefine
+
+% if userType == shareDefine.UserAccType_BeVoter:
+%   adminName = '参评人'
+% else:
+%   adminName = '评委'
+% end
+
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
 
     <h2 class="sub-header">
-            编辑评委信息
+            编辑{{adminName}}信息
     </h2>
 
     <form action="/admin/editVoterData" method="POST" class="form-horizontal" enctype="multipart/form-data">
 
         <input type="hidden" name="voterName" value="{{userAccDao.userAcc}}"/>
+
+        <input type="hidden" name="userType" value="{{userType}}"/>
 
         <div class="form-group">
             <label class="col-sm-1 control-label" >用户名</label>

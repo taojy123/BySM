@@ -1,2 +1,1 @@
-import time
-print int(time.time())
+print int(None)

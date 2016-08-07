@@ -37,14 +37,6 @@ class AdminOper(OperBase):
 
         return self.responseTemplate(tplName='adminLogin', loginSuccess=loginSuccess)
 
-    def voterMgr(self, request, validate=True):
-        if validate and not self.validateAdminLogin(request):
-            return self.redirectLogin()
-
-        colDataList = mongoDBCtrl.SearchData('UserAccDao')
-
-        return self.responseTemplate(dataList=list(colDataList))
-
     def validateAdminLogin(self, request):
         session = request.environ.get('beaker.session')
         sessionAdminName = session.get('adminName', None)
@@ -67,14 +59,20 @@ class AdminOper(OperBase):
     def addVoter(self, request):
         return self.responseTemplate()
 
+    @validate_admin_login_decorator
+    def addBeVoter(self, request):
+        return self.responseTemplate(tplName='addVoter', userType=shareDefine.UserAccType_BeVoter);
+
     def addVoterData(self, request):
         userName = request.forms.get('voterName')
         if not userName:
             return self.voterMgr(request)
 
+        userType = self.getIntUserType(request)
+
         userAccDao = UserAccDao(userName)
         if userAccDao.hasData():
-            return self.responseTemplate(tplName='addVoter', userNameExist=True)
+            return self.responseTemplate(tplName='addVoter', userNameExist=True, userType=userType)
 
         name = request.forms.get('name')
         remark = request.forms.get('remark')
@@ -84,21 +82,43 @@ class AdminOper(OperBase):
         userAccDao.userAcc = userName
         userAccDao.userPsw = commonFunc.GetRandomStr()
         userAccDao.userName = name
-        userAccDao.userType = shareDefine.UserAccType_Voter
+        userAccDao.userType = userType
         userAccDao.regTime = commonFunc.GetIntMillisecond()
         userAccDao.remark = remark
         userAccDao.saveData()
 
-        return self.voterMgr(request)
+        mgr = self.getUserTypeMgr(userType)
+
+        return mgr(request)
+
+    def getUserTypeMgr(self, userType):
+        func = None
+        if userType == shareDefine.UserAccType_Voter:
+            func = self.voterMgr
+        else:
+            func = self.beVoterMgr
+        return func
 
     @validate_admin_login_decorator
     def editVoter(self, request):
         voterAcc = request.GET.get('editVoter')
         userAccDao = UserAccDao(voterAcc)
         if not userAccDao.hasData():
-            return self.voterMgr(request, False);
+            return self.voterMgr(request, False)
 
-        return self.responseTemplate(userAccDao=userAccDao)
+        return self.responseTemplate(userAccDao=userAccDao, userType=self.getIntUserType(request, False))
+
+    def getIntUserType(self, request, isPost=True):
+        if isPost:
+            userType = request.forms.get('userType')
+        else:
+            userType = request.GET.get('userType')
+
+        if userType == None:
+            userType = shareDefine.UserAccType_Voter
+
+        userType = int(userType)
+        return userType
 
     @validate_admin_login_decorator
     def editVoterData(self, request):
@@ -117,7 +137,10 @@ class AdminOper(OperBase):
                 userAccDao.remark = remark
                 userAccDao.saveData()
 
-        return self.voterMgr(request)
+        userType = self.getIntUserType(request)
+        mgr = self.getUserTypeMgr(userType)
+
+        return mgr(request)
 
     @validate_admin_login_decorator
     def deleteVoterData(self, request):
@@ -126,7 +149,10 @@ class AdminOper(OperBase):
         if userAccDao.hasData():
             userAccDao.removeData()
 
-        return self.voterMgr(request)
+        userType = self.getIntUserType(request, False)
+        mgr = self.getUserTypeMgr(userType)
+
+        return mgr(request)
 
     @validate_admin_login_decorator
     def findVoterData(self, request):
@@ -134,9 +160,24 @@ class AdminOper(OperBase):
         if not keyword:
             return self.voterMgr(request)
 
+        userType = self.getIntUserType(request, False)
         col = mongoDBCtrl.GetDataCol('UserAccDao')
-        colDataList = col.find({'$or':[{'Primary': {'$regex': keyword}}, {'userName': {'$regex': keyword}}]})
+        colDataList = col.find({'$or':[{'Primary': {'$regex': keyword}}, {'userName': {'$regex': keyword}}], 'userType':userType})
         if colDataList.count() > 0:
             colDataList.sort("regTime", -1)
 
-        return self.responseTemplate(tplName='voterMgr',dataList=list(colDataList))
+        return self.voterMgr(request, False, userType, colDataList)
+
+    def voterMgr(self, request, validate=True, userType=shareDefine.UserAccType_Voter, colDataList=None):
+        if validate and not self.validateAdminLogin(request):
+            return self.redirectLogin()
+
+        if not colDataList:
+            colDataList = mongoDBCtrl.SearchData('UserAccDao',{'userType':userType})
+            if colDataList.count() > 0:
+                colDataList.sort("regTime", -1)
+
+        return self.responseTemplate(userType=userType, dataList=list(colDataList))
+
+    def beVoterMgr(self, request, validate=True):
+        return self.voterMgr(request, validate=validate, userType=shareDefine.UserAccType_BeVoter)

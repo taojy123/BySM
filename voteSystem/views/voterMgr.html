@@ -1,11 +1,23 @@
 % rebase('views/adminBase.html')
 
+% from common import shareDefine
+% if 'userType' not in dir():
+%   userType = shareDefine.UserAccType_Voter
+% end
+
+% if userType == shareDefine.UserAccType_BeVoter:
+%   adminName = '参评人'
+%   addUserAddr = 'addBeVoter'
+% else:
+%   adminName = '评委'
+%   addUserAddr = 'addVoter'
+% end
+
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
+    <h2 class="sub-header">{{adminName}}管理</h2>
 
-    <h2 class="sub-header">评委管理</h2>
-
-    <a class="col-sm-0 btn btn-warning" href="/admin/addVoter/">添加评委 +</a>
+    <a class="col-sm-0 btn btn-warning" href="/admin/{{addUserAddr}}/">添加{{adminName}} +</a>
     <br/>
     <br/>
     <form class="col-sm-0 output" action="/output/" method="post" onsubmit="$(this).find('.data').val($('#table').html());">
@@ -16,6 +28,8 @@
     </form>
     <br/>
     <form action="/admin/findVoterData" method="get" class="col-sm-1 form-horizontal">
+
+        <input type="hidden" name="userType" value="{{userType}}"/>
 
         <div class="form-group">
             <label  class="col-sm-0 control-label" ></label>
@@ -53,7 +67,7 @@
                         </script>
                     </td>
                     <td>
-                        <a class="btn btn-xs btn-primary" href="/admin/editVoter?editVoter={{voterData['userAcc']}}" >编辑</a>
+                        <a class="btn btn-xs btn-primary" href="/admin/editVoter?editVoter={{voterData['userAcc']}}&userType={{userType}}" >编辑</a>
                         <a class="btn btn-xs btn-danger exit" data-id="{{voterData['userAcc']}}">删除</a>
                     </td>
 
@@ -69,9 +83,9 @@
         $("#userInfoMgr").addClass('active')
         $(".exit").click(function () {
             var id = $(this).attr('data-id');
-            var result = confirm('确认删除该评委账号吗？');
+            var result = confirm('确认删除该{{adminName}}账号吗？');
             if(result){
-                top.location.href = '/admin/deleteVoterData?userAcc='+id;
+                top.location.href = '/admin/deleteVoterData?userAcc=' + id + '&userType={{userType}}';
             }
         });
 </script>
