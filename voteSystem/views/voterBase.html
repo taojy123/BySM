@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>投票管理系统</title>
+    <title>投票系统</title>
 
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/bootstrap-table.css" rel="stylesheet"/>
@@ -37,13 +37,12 @@
             .staff_required{
                 display: none !important;
             }
-        
     </style>
     % from bottle import request
     % session = request.environ.get('beaker.session')
-    % sessionAdminName = session.get('adminName', None)
-    % sessionAdminPsw = session.get('adminPsw', None)
-    % if sessionAdminName and sessionAdminPsw:
+    % sessionVoterName = session.get('voterName', None)
+    % sessionVoterPsw = session.get('voterPsw', None)
+    % if sessionVoterName and sessionVoterPsw:
     %     isLogin = True
     % else:
     %     isLogin = False
@@ -61,11 +60,11 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">投票管理系统</a>
+            <a class="navbar-brand" href="/">投票系统</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">欢迎</a></li>
+                <li><a href="#">欢迎{{sessionVoterName}}</a></li>
             </ul>
         </div><!--/.nav-collapse -->
     </div>
@@ -74,47 +73,19 @@
 <div class="container-fluid">
     <div class="row">
 
-        <div class="col-sm-3 col-md-2 sidebar sidebar-menu">
-
-            <a href="#menu1" class="nav-header menu-first collapsed" data-toggle="collapse">用户信息管理</a>
-            <ul id="menu1" class="nav nav-list collapse menu-second">
-                <li><a href="/admin/voterMgr">评委管理</a></li>
-                <li><a href="/admin/beVoterMgr">参评人管理</a></li>
-            </ul>
-
-            <a href="#nenu2" class="nav-header menu-first collapsed" data-toggle="collapse">投票项目管理</a>
-            <ul id="nenu2" class="nav nav-list collapse menu-second">
-                <li><a href="/admin/voteItemMgr">投票项目管理</a></li>
-            </ul>
-
-            <a href="#nenu3" class="nav-header menu-first collapsed" data-toggle="collapse">报表统计</a>
-            <ul id="nenu3" class="nav nav-list collapse menu-second">
-                <li><a href="/admin/accountTable">账号密码表</a></li>
-                <li><a href="/admin/voterTable/">评委投票情况汇总表</a></li>
-                <li><a href="/admin/beVoterTable/">参评人得票情况汇总表</a></li>
-                <li><a href="/admin/voteRecTable/">投票所有记录查询</a></li>
-                <li><a href="/admin/oneVoteTable/">本次投票汇总表</a></li>
-            </ul>
-
-            <a href="#nenu7" class="nav-header menu-first collapsed" data-toggle="collapse">系统管理</a>
-            <ul id="nenu7" class="nav nav-list collapse menu-second">
-                <li><a href="/admin/backVote/">撤销评委投票</a></li>
-            </ul>
-
-            % if isLogin:
-                <a href="#nenu5" class="nav-header menu-first collapsed" data-toggle="collapse">登出系统</a>
-            % else:
-                <a href="#nenu5" class="nav-header menu-first collapsed" data-toggle="collapse">登录系统</a>
-            % end
-
-            <ul id="nenu5" class="nav nav-list collapse menu-second">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li id="voteItems" style="text-align: center"><a href="/voter/voteItems">投票项目</a></li>
+                <li id="changePsw" style="text-align: center"><a href="/appointments/">修改密码</a></li>
                 % if isLogin:
-                    <li id="login"><a href="/admin/adminLoginOut">退出登录</a></li>
+                %   loginAdd = '/voter/voterLoginOut'
+                %   loginName = '退出系统'
                 % else:
-                    <li id="login"><a href="/admin/adminLogin">登录</a></li>
+                %   loginAdd = '/voter/voterLogin'
+                %   loginName = '登录系统'
                 % end
+                <li id="switchLogin" style="text-align: center"><a href={{loginAdd}}>{{loginName}}</a></li>
             </ul>
-
         </div>
 
         {{!base}}

@@ -48,6 +48,7 @@ class AdminOper(OperBase):
 
         return False
 
+    @validate_admin_login_decorator
     def adminLoginOut(self, request):
         session = request.environ.get('beaker.session')
         del session['adminName']
@@ -148,8 +149,7 @@ class AdminOper(OperBase):
     def deleteVoterData(self, request):
         userAcc = request.GET.get('userAcc')
         userAccDao = UserAccDao(userAcc)
-        if userAccDao.hasData():
-            userAccDao.removeData()
+        userAccDao.removeData()
 
         userType = self.getIntUserType(request, False)
         mgr = self.getUserTypeMgr(userType)
@@ -179,12 +179,13 @@ class AdminOper(OperBase):
             if colDataList.count() > 0:
                 colDataList.sort("regTime", -1)
 
+        print userType
         return self.responseTemplate(userType=userType, dataList=list(colDataList), keyword=keyword)
 
     def beVoterMgr(self, request, validate=True):
         return self.voterMgr(request, validate=validate, userType=shareDefine.UserAccType_BeVoter)
 
-    def voteItemMgr(self, request, validate=True, colDataList=None):
+    def voteItemMgr(self, request, validate=True, colDataList=None, keywordYear='', keywordName=''):
         if validate and not self.validateAdminLogin(request):
             return self.redirectLogin()
 
@@ -213,7 +214,7 @@ class AdminOper(OperBase):
                         voterNameList.append(accColData['userName'])
                 voterNameDict[colData['Primary']] = voterNameList
 
-        return self.responseTemplate(dataList=list(colDataList), voterNameDict=voterNameDict, beVoterNameDict=beVoterNameDict)
+        return self.responseTemplate(dataList=list(colDataList), voterNameDict=voterNameDict, beVoterNameDict=beVoterNameDict, keywordYear=keywordYear, keywordName=keywordName)
 
     @validate_admin_login_decorator
     def addVoteItem(self, request):
@@ -239,7 +240,8 @@ class AdminOper(OperBase):
 
     @validate_admin_login_decorator
     def addVoteItemData(self, request):
-        voteItemData = VoteItemDao(0)
+        primary = int(request.POST.get('primary'))
+        voteItemData = VoteItemDao(primary)
         voteItemData.year = request.POST.get('year')
         voteItemData.name = request.POST.get('name')
         voteItemData.voterTicketCnt = request.POST.get('voterTicketCnt')
@@ -249,8 +251,9 @@ class AdminOper(OperBase):
         if len(remark) > 200:
             remark = remark[:200]
         voteItemData.remark = remark
-        voteItemData.addVoteTime = commonFunc.GetIntMillisecond()
-        voteItemData.setPrimary(self.getNextSeq('VoteItemSeq'))
+        if not voteItemData.hasData():
+            voteItemData.addVoteTime = commonFunc.GetIntMillisecond()
+            voteItemData.setPrimary(self.getNextSeq('VoteItemSeq'))
 
         voterInfoDict = {}
         voterListStr = request.POST.get('voterListStr')
@@ -271,3 +274,52 @@ class AdminOper(OperBase):
         voteItemData.saveData()
 
         return self.voteItemMgr(request)
+
+    @validate_admin_login_decorator
+    def editVoteItem(self, request):
+        primary = request.GET.get('primary')
+        if primary == None:
+            return self.voteItemMgr(request)
+
+        voteItemData = VoteItemDao(int(primary))
+        if not voteItemData.hasData():
+            return self.voteItemMgr(request)
+
+        voterInfoDict = {}
+        for voterAcc in voteItemData.voterInfoDict.iterkeys():
+            voterData = UserAccDao(voterAcc)
+            voterInfoDict[voterAcc] = voterData.userName
+
+        beVoterInfoDict = {}
+        for beVoterAcc in voteItemData.beVoterInfoDict.iterkeys():
+            beVoterData = UserAccDao(beVoterAcc)
+            beVoterInfoDict[beVoterAcc] = beVoterData.userName
+
+        return self.responseTemplate(tplName='addVoteItem', voteItemData=voteItemData, voterInfoDict=voterInfoDict, beVoterInfoDict=beVoterInfoDict)
+
+    @validate_admin_login_decorator
+    def deleteVoteItem(self, request):
+        primary = request.GET.get('primary')
+
+        if primary:
+            voteItemData = VoteItemDao(int(primary))
+            voteItemData.removeData()
+
+        return self.voteItemMgr(request)
+
+    @validate_admin_login_decorator
+    def findVoteItem(self, request):
+        keywordYear = request.GET.get('keywordYear')
+        keywordName = request.GET.get('keywordName')
+
+        searchDict = {}
+        if keywordYear:
+            searchDict['year'] = int(keywordYear)
+
+        if keywordName:
+            searchDict['name'] = {'$regex': keywordName}
+
+        col = mongoDBCtrl.GetDataCol('VoteItemDao')
+        colDataList = col.find(searchDict)
+
+        return self.voteItemMgr(request, colDataList=colDataList, keywordYear=keywordYear, keywordName=keywordName)

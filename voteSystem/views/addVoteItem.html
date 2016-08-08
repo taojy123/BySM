@@ -1,7 +1,26 @@
 % rebase('views/adminBase.html')
 
 % import datetime
+% from common.commonFunc import GetFormatStrByIntMillisecond
 % now = datetime.datetime.now()
+% year = ''
+% name = ''
+% voterTicketCnt = ''
+% beVoterPassCnt = ''
+% isUnSign = ''
+% endTime = ''
+% remark = ''
+% primary = 0
+% if 'voteItemData' in dir():
+%   year = voteItemData.year
+%   name = voteItemData.name
+%   voterTicketCnt = voteItemData.voterTicketCnt
+%   beVoterPassCnt = voteItemData.beVoterPassCnt
+%   isUnSign = voteItemData.isUnSign
+%   remark = voteItemData.remark
+%   primary = voteItemData.getPrimary()
+%   endTime = GetFormatStrByIntMillisecond(voteItemData.endTime)
+% end
 
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
@@ -13,32 +32,37 @@
     <div class="alert alert-info" hidden="true" id="alertInfo"></div>
 
     <form action="/admin/addVoteItemData" method="POST" class="form-horizontal" enctype="multipart/form-data">
-
+        <input type="hidden" name='primary' value="{{primary}}">
         <div class="form-group">
             <label  class="col-sm-2 control-label">年份</label>
-            <input type="text" class="form-control" id="year" name="year" value="" maxlength="4">
+            <input type="text" class="form-control" id="year" name="year" value="{{year}}" maxlength="4">
         </div>
 
         <div class="form-group">
             <label  class="col-sm-2 control-label" >投票项目名称</label>
-            <input type="text" class="form-control" id="voteItemName" name="name" value="">
+            <input type="text" class="form-control" id="voteItemName" name="name" value="{{name}}">
         </div>
 
         <div class="form-group">
             <label  class="col-sm-2 control-label" >评委持票数</label>
-            <input type="text" class="form-control" id="voterTicketCnt" name="voterTicketCnt" value="">
+            <input type="text" class="form-control" id="voterTicketCnt" name="voterTicketCnt" value="{{voterTicketCnt}}">
         </div>
 
         <div class="form-group">
             <label  class="col-sm-2 control-label" >投票通过指标</label>
-            <input type="text" class="form-control" id="beVoterPassCnt" name="beVoterPassCnt" value="">
+            <input type="text" class="form-control" id="beVoterPassCnt" name="beVoterPassCnt" value="{{beVoterPassCnt}}">
         </div>
 
         <div class="form-group">
                 <label  class="col-sm-2 control-label" >是否匿名投票</label>
                 <select class="form-control" name="isUnSign">
-                    <option value='1' selected>是</option>
-                    <option value='0'>否</option>
+                    % if isUnSign == '' or isUnSign == 1:
+                        <option value='1' selected>是</option>
+                        <option value='0'>否</option>
+                    % else:
+                        <option value='0' selected>否</option>
+                        <option value='1'>是</option>
+                    % end
                 </select>
         </div>
 
@@ -92,12 +116,12 @@
 
         <div class="form-group">
             <label  class="col-sm-2 control-label" >投票截止时间</label>
-            <input type="text" class="form-control" id="endTime" name="endTime" value="" maxlength="10" placeholder="格式 yyyy-mm-dd">
+            <input type="text" class="form-control" id="endTime" name="endTime" value="{{endTime}}" maxlength="10" placeholder="格式 yyyy-mm-dd">
         </div>
 
         <div class="form-group">
             <label  class="col-sm-2 control-label" >备注</label>
-            <textarea class="form-control" name="remark" style="width: 60%;" maxlength="200"></textarea>
+            <textarea class="form-control" name="remark" style="width: 60%;" maxlength="200">{{remark}}</textarea>
         </div>
 
         <div class="form-group">
@@ -181,6 +205,10 @@
 
         if(!dateValidate()) return false;
 
+        if({{primary}} != 0){
+            return confirm("确定修改投票项目?修改将重置投票数据!");
+        }
+
         return true;
     }
 
@@ -207,6 +235,9 @@
             var isString = isNaN(value);
             if(isString){
                 showAffirm(affirmName + '请输入数字');
+                return false;
+            }else if(parseInt(value) == 0){
+                showAffirm(affirmName + '不能为0');
                 return false;
             }
         }
@@ -250,5 +281,30 @@
 
         return true;
     };
+
+    var addVoteInfoList = function(userAcc, userName, selectedID, noselected){
+        if(userName == '') userName = '未设置名字';
+
+        var addNode = '<a class="btn btn-xs btn-primary removeVoter" name="' + userAcc + '" style="margin-right: 3px">' + userName + '</a>';
+        $(selectedID).append(addNode);
+
+        $('.removeVoter').click(function(){
+            $(this).remove();
+            if($(selectedID).children().length == 1) $(noselected).attr('hidden', false);
+        });
+    };
+    % if 'voterInfoDict' in dir():
+    %   for userAcc, userName in voterInfoDict.iteritems():
+        addVoteInfoList('{{userAcc}}', '{{userName}}', "#selectedVoterList", "#noSelected");
+    %   end
+        $("#noSelected").attr('hidden', true);
+    % end
+
+    % if 'beVoterInfoDict' in dir():
+    %   for userAcc, userName in beVoterInfoDict.iteritems():
+        addVoteInfoList('{{userAcc}}', '{{userName}}', "#selectedBeVoterList", "#beVoterNoSelected");
+    %   end
+        $("#beVoterNoSelected").attr('hidden', true);
+    % end
 
 </script>

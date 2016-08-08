@@ -26,3 +26,9 @@ def GetIntMillisecondByFormatStr(timeStr):
     timeArray = time.strptime(timeStr, "%Y-%m-%d")
     timeStamp = int(time.mktime(timeArray))
     return timeStamp
+
+def GetFormatStrByIntMillisecond(timeStamp):
+    timeArray = time.localtime(timeStamp)
+    formatStr = time.strftime("%Y-%m-%d", timeArray)
+    # %Y-%m-%d %H:%M:%S
+    return formatStr

@@ -1,2 +1,2 @@
 
-OperClassNameList = ['AdminOper']
+OperClassNameList = ['AdminOper','VoterOper']

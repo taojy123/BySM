@@ -14,15 +14,23 @@
         <button type="submit" class="btn btn-success">导出表格</button>
     </form>
     <br/>
-    <form action="/admin/findVoterData" method="get" class="col-sm-1 form-horizontal">
+
+    <div class="alert alert-info" hidden="true" id="alertInfo"></div>
+
+    <form action="/admin/findVoteItem" method="get" class="col-sm-1 form-horizontal">
 
         <div class="form-group">
-            <label  class="col-sm-0 control-label" ></label>
-            % if 'keyword' not in dir():
-            %   keyword = ''
+            % if 'keywordYear' not in dir():
+            %   keywordYear = ''
             % end
-            <input type="text" class="form-control" name="keyword" value="{{keyword}}">
-            <button type="submit" class="btn btn-success" >查找</button>
+            <input type="text" class="form-control" id="keywordYear" name="keywordYear" value="{{keywordYear}}" placeholder="年度">
+
+            <label  class="col-sm-2 control-label" ></label>
+            % if 'keywordName' not in dir():
+            %   keywordName = ''
+            % end
+            <input type="text" class="form-control" id="keywordName" name="keywordName" value="{{keywordName}}" placeholder="项目名称">
+            <button type="submit" class="btn btn-success" onclick="return searchVoteItem()">查找</button>
         </div>
 
     </form>
@@ -110,4 +118,30 @@
                 top.location.href = '/admin/deleteVoteItem?primary=' + id;
             }
         });
+
+        var searchVoteItem = function(){
+            var date = $('#keywordYear').val();
+            if(!dateValidate(date)) return false;
+            return true;
+        };
+
+        var dateValidate = function(dateStr){
+            if(dateStr == '') return true;
+
+            var yearLength = dateStr.length;
+            var isString = isNaN(dateStr);
+            if(yearLength != 4 || isString){
+                showAffirm('请输入4位年份数字');
+                return false;
+            }
+
+            return true;
+        };
+
+        var showAffirm = function(affirm){
+            if(!affirm) return;
+            $('#alertInfo').attr('hidden', false);
+            $('#alertInfo').html(affirm);
+        };
+
 </script>

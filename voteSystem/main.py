@@ -9,6 +9,7 @@ from common import configReader
 from common.operMapping import OperClassNameList
 import bottle_beaker as beaker
 from oper.adminOper import AdminOper
+from oper.voterOper import VoterOper
 
 
 @hook('before_request')
@@ -23,13 +24,20 @@ def server_static(filepath):
 
 @route('/admin/:funcName', method=["GET", "POST"])
 def admin_oper(funcName=''):
+    return operPro(funcName, 'AdminOper')
+
+@route('/voter/:funcName', method=["GET", "POST"])
+def voter_oper(funcName=''):
+    return operPro(funcName, 'VoterOper')
+
+def operPro(funcName, operName):
     global g_operClassObj
 
-    operClassObj = g_operClassObj.get('AdminOper', None)
+    operClassObj = g_operClassObj.get(operName, None)
     if operClassObj and hasattr(operClassObj, funcName):
         return getattr(operClassObj, funcName)(request)
 
-    abort(404, 'Page Not Found!')
+    return abort(404, 'Page Not Found!')
 
 g_operClassObj = {}
 

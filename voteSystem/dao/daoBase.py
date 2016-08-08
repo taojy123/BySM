@@ -69,6 +69,9 @@ class DaoBase():
         self._primay = primary
         return
 
+    def getPrimary(self):
+        return self._primay
+
     def saveData(self):
         saveDict = {}
         saveDict['Primary'] = self._primay
@@ -90,6 +93,8 @@ class DaoBase():
         return
 
     def removeData(self):
+        if not self.hasData():
+            return
         col = self.getDataCol()
         col.remove({"Primary":self._primay})
         return
