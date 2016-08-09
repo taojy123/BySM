@@ -88,6 +88,7 @@ class AdminOper(OperBase):
         userAccDao.userType = userType
         userAccDao.regTime = commonFunc.GetIntMillisecond()
         userAccDao.remark = remark
+        userAccDao.seqKey = self.getNextSeq('UserAccSeq')
         userAccDao.saveData()
 
         mgr = self.getUserTypeMgr(userType)

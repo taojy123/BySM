@@ -1,0 +1,36 @@
+% rebase('views/voterBase.html')
+% if 'voteKey' not in dir():
+%   voteKey = ''
+% end
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+          <form class="form" method="POST" action="/voter/doUnsignVote" style="text-align: center">
+            <label>投票口令:</label>
+            <input type="text" name="vote_key" value="{{voteKey}}" class="form-control" placeholder="填写您的投票口令 如(3, 133, 322233)" style="width: 400px; display: inline" required autofocus>
+            <button type="submit" class="btn btn-success" >提交选票</button>
+          </form>
+
+          <br>
+          <div class="alert alert-info">
+            如果您已经获得了投票口令,请在上方表单中填入并提交完成投票；若您还未选择候选人,请先登录系统。
+          </div>
+
+            <script>
+                 % if 'voteKeyFormatError' in dir():
+                alert('投票口令格式有误')
+                % end
+
+                % if 'voteKeyError' in dir():
+                    alert('投票口令错误')
+                % end
+
+                % if 'voteSuccess' in dir():
+                    alert('投票成功')
+                % end
+                % if 'voteKeyVotd' in dir():
+                    alert('改投票口令已投过')
+                % end
+            </script>
+
+    </div>
+

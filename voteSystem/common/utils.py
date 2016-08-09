@@ -182,7 +182,8 @@ def get_C(m, U, R, pubkey):
 
 
 # 计算出投票委员会向用户返回的带上盲签名的T
-def get_T(C, pubkey, privkey):
+def get_T(C):
+    pubkey, privkey = get_keypair()
     n, e = pubkey
     p, q, d = privkey
 
@@ -210,7 +211,8 @@ def verified_by_voter(m, U, S, pubkey):
 
 
 # 投票委员会验证投票有效性
-def verified_by_admin(m, U, S, pubkey, privkey):
+def verified_by_admin(m, U, S):
+    pubkey, privkey = get_keypair()
     n, e = pubkey
     p, q, d = privkey
     return pow(H(m, U), d, n) == S

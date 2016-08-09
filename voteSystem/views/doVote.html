@@ -1,0 +1,174 @@
+% rebase('views/voterBase.html')
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <div class="container theme-showcase col-sm-12" role="main">
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h3 class="panel-title">匿名投票步骤</h3>
+            </div>
+            <div class="panel-body">
+              <div class="col-sm-12">
+                <div class="list-group">
+                  <a href="#" class="list-group-item">1、从下方列表选中一名候选人</a>
+                  <a href="#" class="list-group-item">2、点击[领取选票]按钮</a>
+                  <a href="#" class="list-group-item">3、得到一个投票口令, 请记下该口令</a>
+                  <a href="#" class="list-group-item">4、退出登录, 回到匿名投票页面</a>
+                  <a href="#" class="list-group-item">5、在[投票口令]文本框中输入刚才得到的口令, 点击[提交选票], 完成匿名投票</a>
+                  <a href="#" class="list-group-item">注: 本次投票选用的盲签名协议公钥为{{pubkey}}</a>
+                    <label hidden="true" pubkey="{{pubkey}}" id="pubkeyID"></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <div class="alert alert-info" id="vote_key_info" style="display: none;">
+            您的匿名投票口令为 <strong style="color:#e38d13" id="vote_key">0000</strong> 请牢记, 进入<a href="/voter/unsignVote/">匿名投票</a>页面后可使用该口令直接投票.
+        </div>
+        <div class="well" id="selectVoterInfo">
+
+                <div class="row">
+                  <div class="col-xs-12">
+                      % for index, beVoterInfo in enumerate(beVoterInfoList):
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="selectedID" value="{{beVoterInfo.seqKey}}">
+                                    <a class="btn btn-xs btn-info" data-id="voter{{index}}" >{{beVoterInfo.userName}}</a>
+                                </label>
+                                <a class="btn btn-xs btn-primary voterInfo" data-id="voter{{index}}" >显示详情</a>
+                            </div>
+                            <div hidden="true" id="voter{{index}}">
+                                <label>姓名:{{beVoterInfo.userName}}</label><br/>
+                                <label>票数:{{beVoterInfo.beVoteTicket}}</label><br/>
+                                <label>备注:{{beVoterInfo.remark}}</label><br/>
+                                <label id="voterRegTime{{index}}">
+                                    <script>
+                                        $('#voterRegTime{{index}}').html('注册时间:' + serverMilliSecToStr({{beVoterInfo.regTime}}))
+                                    </script>
+                                </label><br/>
+                            </div>
+                      % end
+
+
+                    <a class="btn btn-success" href="##" id="vote">领取选票</a>
+                  </div>
+                </div>
+
+              </div>
+    </div>
+
+<script>
+        $('.voterInfo').click(function(){
+            var detailID = $(this).attr('data-id');
+            var isHidden = $('#' + detailID).attr('hidden');
+            var htmlInfo = '显示详情';
+            if(isHidden) htmlInfo = '隐藏详情';
+            $(this).html(htmlInfo);
+            $('#' + detailID).attr('hidden', !isHidden);
+        });
+
+        function H(m, U){
+            return pow_mod(m, U, 90) + 10
+        }
+
+        function pow_mod(a,b,n){
+            var res=1;
+            while(b!=0){
+                if(b&1) res=(res*a)%n;
+                a=(a*a)%n;
+                b>>=1;
+            }
+            return res;
+        }
+
+        function mod_inverse(a, b){
+
+            mod = b;
+            original_mod = mod;
+            before_mod = mod;
+            qs = [];
+            while(mod != 0){
+                if(mod != before_mod){
+                    qs.splice(0, 0, Math.floor(a / mod));
+                }
+                before_mod = mod;
+                temp = a;
+                a = mod;
+                mod = temp % mod;
+            }
+            if(before_mod != 1){
+                alert('gcd(a, mod) is not 1, thus there is no modular inverse');
+            }
+            s = 0;
+            t = 1;
+            qs = qs.slice(1);
+            for(var i=0; i<qs.length;i++){
+                q = qs[i];
+                temp = s;
+                s = t;
+                t = temp - (q * t);
+            }
+
+            if(t < 0){
+                t = original_mod + t;
+            }
+
+            return t
+        }
+
+
+        $(function(){
+
+            $("#vote").click(function(){
+                var m = $("[name='selectedID']:checked").val();
+                if(!m){
+                    alert("请选择候选人");
+                    return
+                }
+                $("#selectVoterInfo").hide();
+                m = parseInt(m);
+                maxLength = 4;
+                var len = (4 - m.toString().length);
+                var voteIndex = {{voteItem}};
+                var userIndexStr = m.toString();
+                for(var i=0;i<len;i++){
+                    userIndexStr = '0' + userIndexStr;
+                }
+                m = parseInt(voteIndex.toString() + userIndexStr);
+                var pubkey = $('#pubkeyID').attr('pubkey');
+                var n = parseInt(pubkey.split(',')[0].substring(1));
+                var e = parseInt(pubkey.split(',')[1].substring(1, pubkey.split(',')[1].length-1));
+                var U = parseInt(Math.random() * 100);
+                var R = parseInt(Math.random() * 100);
+                var M = H(m, U);
+                var C = pow_mod(R, e, n) * M % n;
+                $.ajax({
+                    url: "/voter/getUnsignTicket",
+                    type: "POST",
+                    data: {C: C, voteItem:{{voteItem}}},
+                    success: function(T){
+                        if(T == 'noticket'){
+                            alert('您的票数不足')
+
+                            return;
+                        }
+
+                        T = parseInt(T);
+                        var S = mod_inverse(R, n) * T % n;
+                        if(pow_mod(S, e, n) == H(m, U)){
+                            $("#vote_key").html(`(${m}, ${U}, ${S})`);
+                            $("#vote_key_info").show();
+                            $("#selectVoterInfo").hide();
+                        }
+                        else {
+                            alert('数据异常,组委会可能存在欺诈!');
+                        }
+                    },
+                    error: function (r) {
+                        alert(r['responseText']);
+                    }
+                });
+
+            })
+        })
+    </script>

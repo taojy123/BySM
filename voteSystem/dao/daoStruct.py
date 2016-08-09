@@ -6,7 +6,8 @@ DaoStruct = {
     'userName':str,
     'userType':int,
     'regTime':int,
-    'remark':str
+    'remark':str,
+    'seqKey':int,
 },
 
 'VoteItemDao':{
