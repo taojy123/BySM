@@ -1,0 +1,142 @@
+% rebase('views/adminBase.html')
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h2 class="sub-header">撤销评委投票</h2>
+    <h4>注意：这里只能撤销非匿名投票项目的评委投票记录</h4>
+    <br/>
+    <div class="alert alert-info" hidden="true" id="alertInfo"></div>
+
+    <form action="/admin/findVoteItem" method="get" class="col-sm-1 form-horizontal">
+
+        <input type="hidden" name="isUnsign" value="0"/>
+
+        <div class="form-group">
+            % if 'keywordYear' not in dir():
+            %   keywordYear = ''
+            % end
+            <input type="text" class="form-control" id="keywordYear" name="keywordYear" value="{{keywordYear}}" placeholder="年度">
+
+            <label  class="col-sm-2 control-label" ></label>
+            % if 'keywordName' not in dir():
+            %   keywordName = ''
+            % end
+            <input type="text" class="form-control" id="keywordName" name="keywordName" value="{{keywordName}}" placeholder="项目名称">
+            <button type="submit" class="btn btn-success" onclick="return searchVoteItem()">查找</button>
+        </div>
+
+    </form>
+
+    <table id="table" data-page-size="50" class="table table-hover" data-pagination="true" data-page-list="[10,50,500,2000,10000]" data-pagination="true">
+        <thead>
+            <tr>
+                <th data-sortable="true">立项时间</th>
+                <th data-sortable="true">年度</th>
+                <th data-sortable="true">投票项目名称</th>
+                <th data-sortable="true">评委持票数</th>
+                <th data-sortable="true">投票通过指标</th>
+                <th data-sortable="true">是否匿名投票</th>
+                <th data-sortable="true">评委列表</th>
+                <th data-sortable="true">参评人列表</th>
+                <th data-sortable="true">截止时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+                % for voteItemData in dataList:
+                    <tr>
+                        <td data-sortable="true" id="addVoteTime{{voteItemData['Primary']}}">
+                            <script>
+                                var time = serverMilliSecToStr('{{voteItemData["addVoteTime"]}}');
+                                $('#addVoteTime{{voteItemData["Primary"]}}').html(time);
+                            </script>
+                        </td>
+                        <td data-sortable="true">{{voteItemData['year']}}</td>
+                        <td data-sortable="true">{{voteItemData['name']}}</td>
+                        <td data-sortable="true">{{voteItemData['voterTicketCnt']}}</td>
+                        <td data-sortable="true">{{voteItemData['beVoterPassCnt']}}</td>
+                        <td data-sortable="true">
+                            % if voteItemData['isUnSign'] == 1:
+                                是
+                            % else:
+                                否
+                            % end
+                        </td>
+                        <td data-sortable="true">
+                            <select class="form-control" name="isUnSign">
+                                % for index, voterName in enumerate(voterNameDict[voteItemData['Primary']]):
+                                % if index == 0:
+                                    <option selected>{{voterName}}</option>
+                                % else:
+                                    <option>{{voterName}}</option>
+                                % end
+                                % end
+                            </select>
+                        </td>
+                        <td data-sortable="true">
+                            <select class="form-control" name="isUnSign">
+                                % for index, voterName in enumerate(beVoterNameDict[voteItemData['Primary']]):
+                                % if index == 0:
+                                    <option selected>{{voterName}}</option>
+                                % else:
+                                    <option>{{voterName}}</option>
+                                % end
+                                % end
+                            </select>
+                        </td>
+                        <td data-sortable="true" id="endTime{{voteItemData['Primary']}}">
+                            <script>
+                                var time = serverMilliSecToStr('{{voteItemData["endTime"]}}');
+                                $("#endTime{{voteItemData['Primary']}}").html(time);
+                            </script>
+                        </td>
+                        <td data-sortable="true">
+                            % if canVoteDict[voteItemData['Primary']]:
+                                <a class="btn btn-xs btn-primary" href="/admin/selectBackVote?selectBackVote={{voteItemData['Primary']}}" >查看</a>
+                            % else:
+                                已截止
+                            % end
+                        </td>
+                    </tr>
+                % end
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+        $("#userInfoMgr").addClass('active')
+        $(".exit").click(function () {
+            var id = $(this).attr('data-id');
+            var result = confirm('确认删除该投票项目吗？');
+            if(result){
+                top.location.href = '/admin/deleteVoteItem?primary=' + id;
+            }
+        });
+
+        var searchVoteItem = function(){
+            var date = $('#keywordYear').val();
+            if(!dateValidate(date)) return false;
+            return true;
+        };
+
+        var dateValidate = function(dateStr){
+            if(dateStr == '') return true;
+
+            var yearLength = dateStr.length;
+            var isString = isNaN(dateStr);
+            if(yearLength != 4 || isString){
+                showAffirm('请输入4位年份数字');
+                return false;
+            }
+
+            return true;
+        };
+
+        var showAffirm = function(affirm){
+            if(!affirm) return;
+            $('#alertInfo').attr('hidden', false);
+            $('#alertInfo').html(affirm);
+        };
+
+</script>

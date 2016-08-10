@@ -1,0 +1,86 @@
+% rebase('views/adminBase.html')
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <div class="container theme-showcase col-sm-12" role="main">
+        <h2 id="nodata">暂无评委投票记录</h2>
+        <div class="well" id="selectVoterInfo">
+                <div class="row">
+                  <div class="col-xs-12">
+                      % for voterAcc, voteInfo in voterRecInfoDict.iteritems():
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="selectedAcc" value="{{voterAcc}}">
+                                    <a class="btn btn-xs btn-info" data-id="voter{{voterAcc}}" >{{voteInfo[0]}}</a>
+                                </label>
+                                <a class="btn btn-xs btn-primary voterInfo" data-id="voter{{voterAcc}}" >显示投票记录</a>
+                            </div>
+                            <div hidden="true" id="voter{{voterAcc}}">
+                                <table id="table" data-page-size="50" class="table table-hover" data-pagination="true" data-page-list="[10,50,500,2000,10000]" data-pagination="true">
+                                    <thead>
+                                        <tr>
+                                            <th data-sortable="true">投票时间</th>
+                                            <th data-sortable="true">参评人账号</th>
+                                            <th data-sortable="true">参评人姓名</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        % for voteRecIndex, voteRec in enumerate(voteInfo[1]):
+                                            <tr>
+                                                <td id="voteRecIndex{{voteRecIndex}}{{voterAcc}}">
+                                                    <script>
+                                                        $('#voteRecIndex{{voteRecIndex}}{{voterAcc}}').html(serverMilliSecToStr({{voteRec['time']}}))
+                                                    </script>
+                                                </td>
+                                                <td>{{voteRec['beVoteAcc']}}</td>
+                                                <td>{{voteRec['beVoteName']}}</td>
+                                            </tr>
+                                        % end
+                                    </tbody>
+                                </table>
+                            </div>
+                      % end
+
+                      <form class="form" method="POST" action="/admin/doBackVote" >
+                            <input type="hidden" name="voterAcc" value="" id="voterAcc">
+                            <input type="hidden" name="voteItem" value="{{voteItem}}">
+                            <button type="submit" class="btn btn-success" onclick="return doBackVote()">撤销投票记录</button>
+                     </form>
+                  </div>
+                </div>
+
+              </div>
+    </div>
+
+<script>
+        $('.voterInfo').click(function(){
+            var detailID = $(this).attr('data-id');
+            var isHidden = $('#' + detailID).attr('hidden');
+            var htmlInfo = '显示投票记录';
+            if(isHidden) htmlInfo = '隐藏投票记录';
+            $(this).html(htmlInfo);
+            $('#' + detailID).attr('hidden', !isHidden);
+        });
+
+        var doBackVote = function(){
+            var m = $("[name='selectedAcc']:checked").val();
+            if(!m){
+                alert("请选择评委");
+                return false;
+            }
+            $('#voterAcc').attr('value', m);
+
+            return true;
+        }
+
+        % if hasData:
+            $('#selectVoterInfo').show()
+            $('#nodata').hide()
+        % else:
+            $('#selectVoterInfo').hide()
+            $('#nodata').show()
+        % end
+
+
+    </script>
+    </div>

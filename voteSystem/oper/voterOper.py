@@ -242,7 +242,7 @@ class VoterOper(OperBase):
         try:
             voteKeyStrList = voteKey.split(',')
             m = int(voteKeyStrList[0].strip()[1:])
-            U = int(voteKeyStrList[1])
+            U = int(voteKeyStrList[1]).strip()
             S = int(voteKeyStrList[2].strip()[:-1])
         except:
             return self.responseTemplate(tplName='unsignVote', voteKeyFormatError=True, voteKey=voteKey)
@@ -296,3 +296,4 @@ class VoterOper(OperBase):
         userData.saveData()
 
         return self.responseTemplate(tplName='changePsw', changeSuccess=True)
+

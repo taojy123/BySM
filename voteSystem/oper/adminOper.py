@@ -6,6 +6,7 @@ from bottle import redirect
 from dao.userAccDao import UserAccDao
 from dao.voteItemDao import VoteItemDao
 from common import shareDefine, commonFunc, mongoDBCtrl
+import time
 
 def validate_admin_login_decorator(fun):
     def wrapper(self, request, *args, **kwargs):
@@ -198,24 +199,30 @@ class AdminOper(OperBase):
         voterNameDict = {}
         beVoterNameDict = {}
         if colDataList.count() > 0:
-            col = mongoDBCtrl.GetDataCol('UserAccDao')
-            colDataList2 = mongoDBCtrl.SearchData('VoteItemDao')
-            for colData in colDataList2:
-                beVoterNameList = []
-                for beVoterAcc in colData['beVoterInfoDict'].iterkeys():
-                    accColData = col.find_one({'userAcc':beVoterAcc})
-                    if accColData:
-                        beVoterNameList.append(accColData['userName'])
-                beVoterNameDict[colData['Primary']] = beVoterNameList
-
-                voterNameList = []
-                for voterAcc in colData['voterInfoDict'].iterkeys():
-                    accColData = col.find_one({'userAcc':voterAcc})
-                    if accColData:
-                        voterNameList.append(accColData['userName'])
-                voterNameDict[colData['Primary']] = voterNameList
+            voterNameDict, beVoterNameDict = self.getVoteBeVoterNameDict()
 
         return self.responseTemplate(dataList=list(colDataList), voterNameDict=voterNameDict, beVoterNameDict=beVoterNameDict, keywordYear=keywordYear, keywordName=keywordName)
+
+    def getVoteBeVoterNameDict(self):
+        voterNameDict = {}
+        beVoterNameDict = {}
+        col = mongoDBCtrl.GetDataCol('UserAccDao')
+        colDataList = mongoDBCtrl.SearchData('VoteItemDao')
+        for colData in colDataList:
+            beVoterNameList = []
+            for beVoterAcc in colData['beVoterInfoDict'].iterkeys():
+                accColData = col.find_one({'userAcc': beVoterAcc})
+                if accColData:
+                    beVoterNameList.append(accColData['userName'])
+            beVoterNameDict[colData['Primary']] = beVoterNameList
+
+            voterNameList = []
+            for voterAcc in colData['voterInfoDict'].iterkeys():
+                accColData = col.find_one({'userAcc': voterAcc})
+                if accColData:
+                    voterNameList.append(accColData['userName'])
+            voterNameDict[colData['Primary']] = voterNameList
+        return voterNameDict, beVoterNameDict
 
     @validate_admin_login_decorator
     def addVoteItem(self, request):
@@ -312,6 +319,7 @@ class AdminOper(OperBase):
     def findVoteItem(self, request):
         keywordYear = request.GET.get('keywordYear')
         keywordName = request.GET.get('keywordName')
+        isUnsign = request.GET.get('isUnsign')
 
         searchDict = {}
         if keywordYear:
@@ -320,7 +328,78 @@ class AdminOper(OperBase):
         if keywordName:
             searchDict['name'] = {'$regex': keywordName}
 
+        if isUnsign:
+            searchDict['isUnSign'] = int(isUnsign)
+
         col = mongoDBCtrl.GetDataCol('VoteItemDao')
         colDataList = col.find(searchDict)
 
+        if isUnsign:
+            return self.backVote(request, colDataList=colDataList, keywordYear=keywordYear, keywordName=keywordName)
+
         return self.voteItemMgr(request, colDataList=colDataList, keywordYear=keywordYear, keywordName=keywordName)
+
+    @validate_admin_login_decorator
+    def backVote(self, request, keywordYear='', keywordName='', colDataList=None):
+        if not colDataList:
+            colDataList = mongoDBCtrl.SearchData('VoteItemDao', {'isUnSign':0})
+
+        voterNameDict = {}
+        beVoterNameDict = {}
+        canVoteDict = {}
+        if colDataList.count() > 0:
+            voterNameDict, beVoterNameDict = self.getVoteBeVoterNameDict()
+            colDataList2 = mongoDBCtrl.SearchData('VoteItemDao', {'isUnSign':0})
+            curIntTime = int(time.time())
+            for colData in colDataList2:
+                canVote = True
+                if curIntTime >= colData["endTime"]:
+                    canVote = False
+                canVoteDict[colData['Primary']] = canVote
+
+            colDataList.sort("addVoteTime", -1)
+
+        return self.responseTemplate(dataList=list(colDataList), keywordYear=keywordYear, keywordName=keywordName, voterNameDict=voterNameDict, beVoterNameDict=beVoterNameDict, canVoteDict=canVoteDict)
+
+    @validate_admin_login_decorator
+    def selectBackVote(self, request, voteItem=None):
+        if voteItem == None:
+            voteItem = int(request.GET.get('selectBackVote'))
+        voteItemData = VoteItemDao(voteItem)
+        hasData = False
+        voterRecInfoDict = {}
+        for voterAcc, voteInfo in voteItemData.voterInfoDict.iteritems():
+            voteRecList =[]
+            for beVoteAcc, beVoteItmeList in voteInfo['voteRec'].iteritems():
+                for beVoteTime in beVoteItmeList:
+                    voteDetailObj = {
+                        'time':beVoteTime,
+                        'beVoteAcc':beVoteAcc,
+                        'beVoteName':UserAccDao(beVoteAcc).userName
+                    }
+                    voteRecList.append(voteDetailObj)
+                    hasData = True
+            if len(voteRecList) == 0:
+                continue
+
+            voterRecInfoDict[voterAcc] = [UserAccDao(voterAcc).userName, voteRecList]
+
+        return self.responseTemplate(voterRecInfoDict=voterRecInfoDict, hasData=hasData, voteItem=voteItem)
+
+    @validate_admin_login_decorator
+    def doBackVote(self, request):
+        voteItem = int(request.POST.get('voteItem'))
+        voterAcc = request.POST.get('voterAcc')
+
+        voteItemData = VoteItemDao(voteItem)
+        voteRecDict = voteItemData.voterInfoDict[voterAcc]['voteRec']
+        voteDict = {}
+        for beVoteAcc, voteRecList in voteRecDict.iteritems():
+            recTicNum = len(voteRecList)
+            voteItemData.voterInfoDict[voterAcc]['voterLeftTicket'] += recTicNum
+            voteItemData.beVoterInfoDict[beVoteAcc] -= recTicNum
+
+        voteItemData.voterInfoDict[voterAcc]['voteRec'] = {}
+        voteItemData.saveData()
+
+        return self.selectBackVote(request, voteItem=voteItem)
