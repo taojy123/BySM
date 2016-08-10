@@ -1,0 +1,72 @@
+% rebase('views/voterBase.html')
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <div class="container theme-showcase col-sm-12" role="main">
+
+        <h2 class="sub-header">实名投票</h2>
+
+        <div class="well" id="selectVoterInfo">
+
+                <div class="row">
+                  <div class="col-xs-12">
+                      % for index, beVoterInfo in enumerate(beVoterInfoList):
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="selectedID" value="{{beVoterInfo.seqKey}}">
+                                    <a class="btn btn-xs btn-info" data-id="voter{{index}}" >{{beVoterInfo.userName}}</a>
+                                </label>
+                                <a class="btn btn-xs btn-primary voterInfo" data-id="voter{{index}}" >显示详情</a>
+                            </div>
+                            <div hidden="true" id="voter{{index}}">
+                                <label>姓名:{{beVoterInfo.userName}}</label><br/>
+                                <label>所得票数:{{beVoterInfo.beVoteTicket}}</label><br/>
+                                <label>备注:{{beVoterInfo.remark}}</label><br/>
+                                <label id="voterRegTime{{index}}">
+                                    <script>
+                                        $('#voterRegTime{{index}}').html('注册时间:' + serverMilliSecToStr({{beVoterInfo.regTime}}))
+                                    </script>
+                                </label><br/>
+                            </div>
+                      % end
+
+                      <form class="form" method="POST" action="/voter/signVote" >
+                            <input type="hidden" name="beVoterSeq" value="" id="beVoterSeq">
+                            <input type="hidden" name="voteItem" value="{{voteItem}}">
+                            <button type="submit" class="btn btn-success" onclick="return doSivnVote()">投票</button>
+                     </form>
+                  </div>
+                </div>
+
+              </div>
+    </div>
+
+<script>
+        $('.voterInfo').click(function(){
+            var detailID = $(this).attr('data-id');
+            var isHidden = $('#' + detailID).attr('hidden');
+            var htmlInfo = '显示详情';
+            if(isHidden) htmlInfo = '隐藏详情';
+            $(this).html(htmlInfo);
+            $('#' + detailID).attr('hidden', !isHidden);
+        });
+
+        var doSivnVote = function(){
+            var m = $("[name='selectedID']:checked").val();
+            if(!m){
+                alert("请选择候选人");
+                return false;
+            }
+            $('#beVoterSeq').attr('value', m);
+
+            return true;
+        }
+        % if 'signVoteSuccess' in dir() and signVoteSuccess:
+            alert('投票成功！')
+        % end
+
+        % if 'noticket' in dir() and noticket:
+            alert('票数不足！')
+        % end
+
+    </script>

@@ -128,6 +128,10 @@ class VoterOper(OperBase):
         if not voteItemData.hasData():
             return self.voteItems(request)
 
+        # 实名投票在另外一个页面处理
+        if not voteItemData.isUnSign:
+            return self.doSignVote(request, False, voteItemData, voteItem)
+
         pubkey, privkey = get_keypair()
 
         beVoterInfoList = []
@@ -140,6 +144,48 @@ class VoterOper(OperBase):
             beVoterInfoList.append(userData)
 
         return self.responseTemplate(pubkey=pubkey, beVoterInfoList=beVoterInfoList, voteItem=voteItem)
+
+    def doSignVote(self, request, isValidateLogin=True, voteItemData=None, voteItem=0, noticket=False, signVoteSuccess=False):
+        if isValidateLogin and not self.validateVoterLogin(request) or not voteItemData:
+            return self.voteItems(request, False)
+
+        beVoterInfoList = []
+        for userAcc, beVoteTicket in voteItemData.beVoterInfoDict.iteritems():
+            userData = UserAccDao(userAcc)
+            if not userData.hasData():
+                continue
+
+            setattr(userData, 'beVoteTicket', beVoteTicket)
+            beVoterInfoList.append(userData)
+
+        return self.responseTemplate(beVoterInfoList=beVoterInfoList, voteItem=voteItem, noticket=noticket, signVoteSuccess=signVoteSuccess)
+
+    @validate_admin_login_decorator
+    def signVote(self, request):
+        beVoterSeq = int(request.POST.get('beVoterSeq'))
+        voteItem = int(request.POST.get('voteItem'))
+
+        col = mongoDBCtrl.GetDataCol('UserAccDao')
+        colData = col.find_one({'seqKey': beVoterSeq})
+
+        voterAcc = self.getUserAcc(request)
+        voteItemData = VoteItemDao(voteItem)
+
+        leftTicket = voteItemData.voterInfoDict[voterAcc]['voterLeftTicket']
+        if leftTicket < 1:
+            return self.doSignVote(request, False, voteItemData, voteItem, True)
+
+        voteItemData.voterInfoDict[voterAcc]['voterLeftTicket'] -= 1
+        voteItemData.beVoterInfoDict[colData['userAcc']] += 1
+
+        voterVoteRecDict = voteItemData.voterInfoDict[voterAcc]['voteRec']
+        voterVoteInfoList = voterVoteRecDict.get(colData['userAcc'], [])
+        voterVoteInfoList.append(int(time.time()))
+        voterVoteRecDict[colData['userAcc']] = voterVoteInfoList
+
+        voteItemData.saveData()
+
+        return self.doSignVote(request, False, voteItemData, voteItem, signVoteSuccess=True)
 
     def unsignVote(self, request):
         session = request.environ.get('beaker.session')
@@ -232,3 +278,21 @@ class VoterOper(OperBase):
         if col.find().count() < 1:
             return []
         return col.find_one()['voteKeyList']
+
+    @validate_admin_login_decorator
+    def changePsw(self, request):
+        return self.responseTemplate()
+
+    @validate_admin_login_decorator
+    def doChangePsw(self, request):
+        userAcc = self.getUserAcc(request)
+        userData = UserAccDao(userAcc)
+        print userData.userPsw
+        print request.POST.get('passwordOld')
+        if userData.userPsw != request.POST.get('passwordOld'):
+            return self.responseTemplate(tplName='changePsw', oldPswErr=True)
+
+        userData.userPsw = request.POST.get('passwordNew')
+        userData.saveData()
+
+        return self.responseTemplate(tplName='changePsw', changeSuccess=True)
