@@ -1,0 +1,65 @@
+% rebase('views/adminBase.html')
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h2 class="sub-header">参评人投票汇总</h2>
+
+    <form class="col-sm-0 output" action="/output/" method="post" onsubmit="$(this).find('.data').val($('#table').html());">
+        <input type="hidden" name="data" class="data"/>
+        <!--<input type="hidden" name="begin_index" value="1"/>-->
+        <!--<input type="hidden" name="end_index" value="-1"/>-->
+        <button type="submit" class="btn btn-success">导出表格</button>
+    </form>
+    <br/>
+    <form action="/admin/findBeVoterVoteData" method="get" class="col-sm-1 form-horizontal">
+        <div class="form-group">
+            <label  class="col-sm-0 control-label" ></label>
+            % if 'keyword' not in dir():
+            %   keyword = ''
+            % end
+            <input type="text" class="form-control" name="keyword" value="{{keyword}}" placeholder="参评人账号或姓名">
+            <button type="submit" class="btn btn-success" >查找</button>
+        </div>
+
+    </form>
+
+    <table id="table" data-page-size="50" class="table table-hover" data-pagination="true" data-page-list="[10,50,500,2000,10000]" data-pagination="true">
+        <thead>
+            <tr>
+                <th data-sortable="true">年度</th>
+                <th data-sortable="true">投票项目名称</th>
+                <th data-sortable="true">参评人账号</th>
+                <th data-sortable="true">参评人姓名</th>
+                <th data-sortable="true">项目通过票数</th>
+                <th data-sortable="true">所得票数</th>
+                <th>投票项目状态</th>
+            </tr>
+        </thead>
+        <tbody>
+                % for voterData in infoList:
+                <tr>
+                    <td data-sortable="true">{{voterData['year']}}</td>
+                    <td data-sortable="true">{{voterData['name']}}</td>
+                    <td data-sortable="true">{{voterData['userAcc']}}</td>
+                    <td data-sortable="true">{{voterData['userName']}}</td>
+                    <td data-sortable="true">{{voterData['beVoterPassCnt']}}</td>
+                    %if voterData['beVotetCnt'] >= voterData['beVoterPassCnt']:
+                    %    color = 'green'
+                    % else:
+                    %   color = 'black'
+                    % end
+                    <td data-sortable="true" style="color:{{color}}">{{voterData['beVotetCnt']}}</td>
+                    <td>
+                        % if voterData['isEnd'] == 0:
+                            进行中
+                        % else:
+                            已截止
+                        % end
+                    </td>
+
+                </tr>
+                % end
+        </tbody>
+    </table>
+
+</div>

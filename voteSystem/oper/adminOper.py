@@ -403,3 +403,133 @@ class AdminOper(OperBase):
         voteItemData.saveData()
 
         return self.selectBackVote(request, voteItem=voteItem)
+
+    @validate_admin_login_decorator
+    def voterTable(self, request, keyword=''):
+        infoList = []
+        searchDict = {}
+        if keyword:
+            searchDict = {'$or': [{'Primary': keyword}, {'userName': keyword}]}
+
+        searchDict['userType'] = shareDefine.UserAccType_Voter
+
+        col = mongoDBCtrl.GetDataCol('UserAccDao')
+        userColDataList = col.find(searchDict)
+        for userColData in userColDataList:
+            colDataList = mongoDBCtrl.SearchData('VoteItemDao')
+            if colDataList.count() > 0:
+                colDataList.sort("addVoteTime", -1)
+            for colDataItem in colDataList:
+                if colDataItem['voterInfoDict'].has_key(userColData['userAcc']):
+                    curIntTime = int(time.time())
+                    isEnd = 0
+                    if curIntTime >= colDataItem["endTime"]:
+                        isEnd = 1
+
+                    dataObj = {
+                        'year':colDataItem['year'],
+                        'name':colDataItem['name'],
+                        'voterTicketCnt':colDataItem['voterTicketCnt'],
+                        'voterLeftTicket':colDataItem['voterInfoDict'][userColData['userAcc']]['voterLeftTicket'],
+                        'isEnd':isEnd,
+                        'userAcc':userColData['userAcc'],
+                        'userName':userColData['userName']
+                    }
+                    infoList.append(dataObj)
+
+        return self.responseTemplate(infoList=infoList, keyword=keyword)
+
+    @validate_admin_login_decorator
+    def findVoterVoteData(self, request):
+        return self.voterTable(request, request.GET.get('keyword'))
+
+    @validate_admin_login_decorator
+    def beVoterTable(self, request, keyword=''):
+        infoList = []
+        searchDict = {}
+        if keyword:
+            searchDict = {'$or': [{'Primary': keyword}, {'userName': keyword}]}
+
+        searchDict['userType'] = shareDefine.UserAccType_BeVoter
+
+        col = mongoDBCtrl.GetDataCol('UserAccDao')
+        userColDataList = col.find(searchDict)
+        for userColData in userColDataList:
+            colDataList = mongoDBCtrl.SearchData('VoteItemDao')
+            if colDataList.count() > 0:
+                colDataList.sort("addVoteTime", -1)
+            for colDataItem in colDataList:
+                if colDataItem['beVoterInfoDict'].has_key(userColData['userAcc']):
+                    curIntTime = int(time.time())
+                    isEnd = 0
+                    if curIntTime >= colDataItem["endTime"]:
+                        isEnd = 1
+
+                    dataObj = {
+                        'year': colDataItem['year'],
+                        'name': colDataItem['name'],
+                        'beVoterPassCnt': colDataItem['beVoterPassCnt'],
+                        'beVotetCnt': colDataItem['beVoterInfoDict'][userColData['userAcc']],
+                        'isEnd': isEnd,
+                        'userAcc': userColData['userAcc'],
+                        'userName': userColData['userName']
+                    }
+                    infoList.append(dataObj)
+        return self.responseTemplate(infoList=infoList, keyword=keyword)
+
+    @validate_admin_login_decorator
+    def findBeVoterVoteData(self, request):
+        return self.beVoterTable(request, request.GET.get('keyword'))
+
+    @validate_admin_login_decorator
+    def findVoteItemTable(self, request):
+        keywordYear = request.GET.get('keywordYear')
+        keywordName = request.GET.get('keywordName')
+        return self.voteRecTable(request, keywordYear, keywordName)
+
+    @validate_admin_login_decorator
+    def voteRecTable(self, request, keywordYear='', keywordName=''):
+        infoList = []
+        searchDict = {}
+        if keywordYear:
+            searchDict['year'] = int(keywordYear)
+
+        if keywordName:
+            searchDict['name'] = {'$regex': keywordName}
+
+        col = mongoDBCtrl.GetDataCol('VoteItemDao')
+        colDataList = col.find(searchDict)
+        if colDataList.count() > 0:
+            colDataList.sort("addVoteTime", -1)
+
+        for colData in colDataList:
+            voterList = []
+            hasTicketVoterList = []
+            for voterAcc, voterInfo in colData['voterInfoDict'].iteritems():
+                voterName = UserAccDao(voterAcc).userName
+                voterList.append(voterName)
+                if voterInfo['voterLeftTicket'] > 0:
+                    hasTicketVoterList.append(voterName)
+
+            beVoterList = []
+            passBeVoterList = []
+            for beVoterAcc, beVoterTicket in colData['beVoterInfoDict'].iteritems():
+                beVoterName = UserAccDao(beVoterAcc).userName
+                beVoterList.append(beVoterName)
+                if beVoterTicket >= colData['beVoterPassCnt']:
+                    passBeVoterList.append(beVoterName)
+
+            dataObj = {
+                'addVoteTime':colData['addVoteTime'],
+                'year':colData['year'],
+                'name':colData['name'],
+                'voterList': voterList,
+                'beVoterList':beVoterList,
+                'beVoterPassCnt':colData['beVoterPassCnt'],
+                'hasTicketVoterList':hasTicketVoterList,
+                'passBeVoterList':passBeVoterList,
+                'endTime':colData['endTime']
+            }
+            infoList.append(dataObj)
+
+        return self.responseTemplate(infoList=infoList, keywordYear=keywordYear, keywordName=keywordName)
