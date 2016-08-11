@@ -44,7 +44,9 @@
         <thead>
             <tr>
                 <th data-sortable="true">账号</th>
-                <th data-sortable="true">密码</th>
+                % if adminName == '评委':
+                    <th data-sortable="true">密码</th>
+                % end
                 <th data-sortable="true">姓名</th>
                 <th data-sortable="true">注册时间</th>
                 <th>操作</th>
@@ -55,7 +57,9 @@
                 % for voterData in dataList:
                 <tr>
                     <td data-sortable="true">{{voterData['userAcc']}}</td>
-                    <td data-sortable="true">{{voterData['userPsw']}}</td>
+                    % if adminName == '评委':
+                        <td data-sortable="true">{{voterData['userPsw']}}</td>
+                    % end
                     <td data-sortable="true">{{voterData['userName']}}</td>
                     <td data-sortable="true" id="regTime{{index}}">
                         <script>

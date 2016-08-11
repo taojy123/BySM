@@ -17,6 +17,11 @@ def strip_path():
     request.environ['PATH_INFO'] = request.environ['PATH_INFO'].rstrip('/')
 
 
+@route('/')
+def index():
+    redirect("/voter/voterLogin")
+
+
 @route('/static/<filepath:path>')
 def server_static(filepath):
     return static_file(filepath, root='./static')
@@ -26,9 +31,11 @@ def server_static(filepath):
 def admin_oper(funcName=''):
     return operPro(funcName, 'AdminOper')
 
+
 @route('/voter/:funcName', method=["GET", "POST"])
 def voter_oper(funcName=''):
     return operPro(funcName, 'VoterOper')
+
 
 def operPro(funcName, operName):
     global g_operClassObj
@@ -39,6 +46,7 @@ def operPro(funcName, operName):
 
     return abort(404, 'Page Not Found!')
 
+
 g_operClassObj = {}
 
 def initOperClass():
@@ -47,6 +55,7 @@ def initOperClass():
         operObj = getClass(className)
         g_operClassObj[className] = operObj
     return
+
 
 def getClass(className):
     return eval(className + '()')
