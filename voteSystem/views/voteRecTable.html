@@ -6,8 +6,7 @@
 
     <form class="col-sm-0 output" action="/output/" method="post" onsubmit="$(this).find('.data').val($('#table').html());">
         <input type="hidden" name="data" class="data"/>
-        <!--<input type="hidden" name="begin_index" value="1"/>-->
-        <!--<input type="hidden" name="end_index" value="-1"/>-->
+        <input type="hidden" name="end_index" value="9"/>
         <button type="submit" class="btn btn-success">导出表格</button>
     </form>
     <br/>
