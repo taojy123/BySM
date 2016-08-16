@@ -1,7 +1,7 @@
 # coding:GBK
 
 from operBase import OperBase
-from common.configReader import GetSystemConfig
+from common.configReader import GetSystemConfig, ReLoadConfig
 from bottle import redirect
 from dao.userAccDao import UserAccDao
 from dao.voteItemDao import VoteItemDao
@@ -29,7 +29,15 @@ class AdminOper(OperBase):
 
     def adminLoginValidate(self, request):
         userName = request.forms.get('username')
+        try:
+            userName = int(userName)
+        except:
+            pass
         password = request.forms.get('password')
+        try:
+            password = int(password)
+        except:
+            pass
         loginSuccess = False
         if userName == GetSystemConfig().accountName and password == GetSystemConfig().accountPsw:
             loginSuccess = True
@@ -181,7 +189,6 @@ class AdminOper(OperBase):
             if colDataList.count() > 0:
                 colDataList.sort("regTime", -1)
 
-        print userType
         return self.responseTemplate(userType=userType, dataList=list(colDataList), keyword=keyword)
 
     def beVoterMgr(self, request, validate=True):
@@ -480,6 +487,37 @@ class AdminOper(OperBase):
     @validate_admin_login_decorator
     def findBeVoterVoteData(self, request):
         return self.beVoterTable(request, request.GET.get('keyword'))
+
+    @validate_admin_login_decorator
+    def changeAdminPsw(self, request):
+        return self.responseTemplate()
+
+    @validate_admin_login_decorator
+    def doChangeAdminPsw(self, request):
+        oldPsw = request.POST.get('passwordOld')
+        try:
+            oldPsw = int(oldPsw)
+        except:
+            pass
+
+        newPsw = request.POST.get('passwordNew')
+
+        oldPswErr = False
+        changeSuccess = False
+        if oldPsw != GetSystemConfig().accountPsw:
+            oldPswErr = True
+        else:
+            configFileR = open('config/systemConfig.ini', 'r')
+            content = configFileR.read()
+            configFileR.close()
+            content = content.replace('accountPsw = %s'%oldPsw, 'accountPsw = %s'%newPsw)
+            configFile = open('config/systemConfig.ini', 'w')
+            configFile.write(content)
+            configFile.close()
+            changeSuccess = True
+            ReLoadConfig('config/systemConfig.ini')
+
+        return self.responseTemplate(tplName='changeAdminPsw', oldPswErr=oldPswErr, changeSuccess=changeSuccess)
 
     @validate_admin_login_decorator
     def findVoteItemTable(self, request):

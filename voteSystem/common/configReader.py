@@ -35,6 +35,12 @@ def GetConfig(fileName):
         g_config[fileName] = ReadConfig(fileName)
     return g_config[fileName]
 
+def ReLoadConfig(fileName):
+    global g_config
+    if g_config.has_key(fileName):
+        g_config[fileName] = ReadConfig(fileName)
+    return
+
 def GetSystemConfig():
     return GetConfig('config/systemConfig.ini')
 

@@ -158,22 +158,32 @@ class VoterOper(OperBase):
             setattr(userData, 'beVoteTicket', beVoteTicket)
             beVoterInfoList.append(userData)
 
-        return self.responseTemplate(beVoterInfoList=beVoterInfoList, voteItem=voteItem, noticket=noticket, signVoteSuccess=signVoteSuccess)
+        leftTicket = voteItemData.voterInfoDict[self.getUserAcc(request)]['voterLeftTicket']
+
+        return self.responseTemplate(beVoterInfoList=beVoterInfoList, voteItem=voteItem, noticket=noticket, signVoteSuccess=signVoteSuccess, leftTicket=leftTicket)
 
     @validate_admin_login_decorator
     def signVote(self, request):
-        beVoterSeq = int(request.POST.get('beVoterSeq'))
+        beVoterSeq = request.POST.get('beVoterSeq')
         voteItem = int(request.POST.get('voteItem'))
 
-        col = mongoDBCtrl.GetDataCol('UserAccDao')
-        colData = col.find_one({'seqKey': beVoterSeq})
-
+        beVoterIDList = beVoterSeq.split('_')
         voterAcc = self.getUserAcc(request)
         voteItemData = VoteItemDao(voteItem)
-
         leftTicket = voteItemData.voterInfoDict[voterAcc]['voterLeftTicket']
-        if leftTicket < 1:
+        if leftTicket < len(beVoterIDList):
             return self.doSignVote(request, False, voteItemData, voteItem, True)
+
+        for beVoterID in beVoterIDList:
+            self.voteLogic(int(beVoterID), voteItemData, request, voteItem)
+
+        return self.doSignVote(request, False, voteItemData, voteItem, signVoteSuccess=True)
+
+    def voteLogic(self, beVoterSeqID, voteItemData, request, voteItem):
+        col = mongoDBCtrl.GetDataCol('UserAccDao')
+        colData = col.find_one({'seqKey': beVoterSeqID})
+
+        voterAcc = self.getUserAcc(request)
 
         voteItemData.voterInfoDict[voterAcc]['voterLeftTicket'] -= 1
         voteItemData.beVoterInfoDict[colData['userAcc']] += 1
@@ -184,8 +194,7 @@ class VoterOper(OperBase):
         voterVoteRecDict[colData['userAcc']] = voterVoteInfoList
 
         voteItemData.saveData()
-
-        return self.doSignVote(request, False, voteItemData, voteItem, signVoteSuccess=True)
+        return
 
     def unsignVote(self, request):
         session = request.environ.get('beaker.session')

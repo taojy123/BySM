@@ -5,15 +5,15 @@
     <div class="container theme-showcase col-sm-12" role="main">
 
         <h2 class="sub-header">实名投票</h2>
-
+        <label>剩余票数：<label id="leftTicket">{{leftTicket}}</label></label>
         <div class="well" id="selectVoterInfo">
 
                 <div class="row">
                   <div class="col-xs-12">
                       % for index, beVoterInfo in enumerate(beVoterInfoList):
-                            <div class="radio">
+                            <div class="checkbox">
                                 <label>
-                                    <input type="radio" name="selectedID" value="{{beVoterInfo.seqKey}}">
+                                    <input type="checkbox" class="checkboxBtn" name="selectedID" value="{{beVoterInfo.seqKey}}">
                                     <a class="btn btn-xs btn-info" data-id="voter{{index}}" >{{beVoterInfo.userName}}</a>
                                 </label>
                                 <a class="btn btn-xs btn-primary voterInfo" data-id="voter{{index}}" >显示详情</a>
@@ -42,6 +42,22 @@
     </div>
 
 <script>
+        $('.checkboxBtn').click(function(){
+            var isChecked = $(this).is(":checked");
+            var preValue = parseInt($('#leftTicket').html());
+
+            if(isChecked){
+                preValue -= 1;
+                if(preValue < 0){
+                    $(this).attr('checked', false);
+                    alert("票数不足");
+                    return;
+                }
+
+            }else preValue += 1;
+            $('#leftTicket').html(preValue);
+        });
+
         $('.voterInfo').click(function(){
             var detailID = $(this).attr('data-id');
             var isHidden = $('#' + detailID).attr('hidden');
@@ -52,12 +68,15 @@
         });
 
         var doSivnVote = function(){
-            var m = $("[name='selectedID']:checked").val();
+            var m = $("input:checkbox[name='selectedID']:checked").map(function(index,elem) {
+                return $(elem).val();
+            }).get().join('_');
+
             if(!m){
                 alert("请选择候选人");
                 return false;
             }
-            $('#beVoterSeq').attr('value', m);
+            $('#beVoterSeq').attr('value', m)
 
             return true;
         }
@@ -66,7 +85,7 @@
         % end
 
         % if 'noticket' in dir() and noticket:
-            alert('票数不足！')
+            alert('票数不足')
         % end
 
     </script>

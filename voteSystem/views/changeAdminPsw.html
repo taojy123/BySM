@@ -1,0 +1,68 @@
+% rebase('views/adminBase.html')
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+            
+    <h2 class="sub-header">修改密码</h2>
+
+    <div class="alert alert-info" hidden="true" id="alertInfo"></div>
+
+    <form id="form" action="/admin/doChangeAdminPsw" method="POST" class="form-horizontal">
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >旧密码:</label>
+            <input type="password" class="form-control"  style="display:inline;width:auto;" name="passwordOld" >
+            <label class="alert alert-danger control-label" id="passwordValiDate" hidden="true"></label>
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" >新密码:</label>
+            <input type="password" class="form-control"  style="display:inline;width:auto;" name="passwordNew" >
+            <label class="alert alert-danger control-label" id="passwordValiDateNew" hidden="true"></label>
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-2 control-label" ></label>
+            <button type="submit" class="btn btn-success" onclick="return valiDateNewPsw()">提交</button>
+        </div>
+    </form>
+
+
+    <script>
+        $("#changePsw").addClass('active')
+
+        var valiDateNewPsw = function(){
+            if(!valiDateCommon('passwordValiDate', '旧密码', 20)) return false;
+            if(!valiDateCommon('passwordValiDateNew', '新密码', 20)) return false;
+
+            return true;
+        }
+
+        var showAffirm = function(affirm){
+            if(!affirm) return;
+            $('#alertInfo').attr('hidden', false);
+            $('#alertInfo').html(affirm);
+        }
+
+        % if 'oldPswErr' in dir() and oldPswErr == True:
+            showAffirm('旧密码错误')
+        % end
+
+        % if 'changeSuccess' in dir() and changeSuccess == True:
+            showAffirm('修改成功')
+        % end
+
+    </script>
+
+        % if 'loginSuccess' in dir() and loginSuccess == False:
+            <div class="alert alert-danger" id="validateError">用户名或密码错误</div>
+            <script>
+                var delayHidden = function(){
+                    setTimeout('document.getElementById("validateError").hidden = true', 3000);
+                }
+                delayHidden()
+            </script>
+        % end
+
+
+</div>
