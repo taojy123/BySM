@@ -18,33 +18,105 @@
             添加{{adminName}}
     </h2>
 
+    <div class="alert alert-info" hidden="true" id="alertInfo"></div>
+
     <form action="/admin/addVoterData" method="POST" class="form-horizontal" enctype="multipart/form-data">
 
         <input type="hidden" name="userType" value="{{userType}}"/>
 
         <div class="form-group">
-            <label  class="col-sm-1 control-label" >用户名</label>
-            <input type="text" class="form-control" name="voterName" value="">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >工作证号</label>
+            <input type="text" class="form-control" name="voterName" id="userName" value="" maxlength="4">
             <label class="alert alert-danger control-label" id="userNameValidate" hidden="true"></label>
         </div>
 
         <div class="form-group">
-            <label  class="col-sm-1 control-label" >姓名</label>
-            <input type="text" class="form-control" name="name" value="">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >姓名</label>
+            <input type="text" class="form-control" id="name" name="name" value="">
         </div>
 
         <div class="form-group">
-            <label  class="col-sm-1 control-label" >备注</label>
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >身份证</label>
+            <input type="text" class="form-control" name="shenfenzheng" id="shenfenzheng" value="">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >出生年月</label>
+            <input type="text" class="form-control" name="shengri" id="shengri" value="" placeholder="yyyy-mm-dd">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >性别</label>
+            <div class="col-sm-4">
+                <input type="radio" name="sex" value="1" checked><label class="control-label">男&nbsp;&nbsp;</label><input type="radio" name="sex" value="2"><label class="control-label">女</label>
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >职称</label>
+            <input type="text" class="form-control" name="zhicheng" value="">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >职称等级</label>
+            <input type="text" class="form-control" name="zhichengLv" value="">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >职务</label>
+            <input type="text" class="form-control" name="zhiwu" value="">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >最高学历</label>
+            <input type="text" class="form-control" name="zuigaoxueli" value="">
+        </div>
+        % if userType != shareDefine.UserAccType_BeVoter:
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >简介</label>
+                <textarea class="form-control" name="jianjie" style="width: 60%;" maxlength="200"></textarea>
+             </div>
+
+        % else:
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >毕业院校</label>
+                <input type="text" class="form-control" name="biyeyuanxiao" value="">
+             </div>
+
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >入职时间</label>
+                <input type="text" class="form-control" name="ruzhishijian" value="" id="ruzhishijian" placeholder="yyyy-mm-dd">
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >主要经历</label>
+                <textarea class="form-control" name="zhuyaojingli" style="width: 60%;" maxlength="200"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >学术成果</label>
+                <textarea class="form-control" name="xueshuchengguo" style="width: 60%;" maxlength="200"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >获奖信息</label>
+                <textarea class="form-control" name="huojiangxinxi" style="width: 60%;" maxlength="200"></textarea>
+            </div>
+        % end
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >备注</label>
             <textarea class="form-control" name="remark" style="width: 60%;" maxlength="200"></textarea>
         </div>
 
         <div class="form-group">
-            <label  class="col-sm-1 control-label"></label>
-            <button type="submit" class="btn btn-success" onclick="return userNameValiDate()">提交</button>
+            <label  class="col-sm-1 col-sm-offset-1 control-label"></label>
+            <button type="submit" class="btn btn-success" onclick="return validateVoterInfo()">提交</button>
         </div>
 
         % if 'userNameExist' in dir() and userNameExist == True:
-            <div class="alert alert-danger" id="userAccExist">用户名已存在</div>
+            <div class="alert alert-danger" id="userAccExist">工作证号已存在</div>
             <script>
                 var delayHidden = function(){
                     setTimeout('document.getElementById("userAccExist").hidden = true', 3000);
@@ -58,5 +130,6 @@
 </div>
 
 <script>
-        $("#userInfoMgr").addClass('active')
+        $("#userInfoMgr").addClass('active');
+
 </script>

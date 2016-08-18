@@ -25,13 +25,19 @@
 
         <div class="form-group">
             <label  class="col-sm-2 control-label" ></label>
-            <button type="submit" class="btn btn-success" onclick="return valiDateNameAndPsw()">登录</button>
+            <button type="submit" class="btn btn-success" onclick="return validateAdminLogin()">登录</button>
         </div>
     </form>
 
 
     <script>
         $("#login").addClass('active')
+        var validateAdminLogin = function(){
+            if(!valiDateCommon('userNameValidate', '用户名', 20)) return false;
+            if(!userPswValiDate()) return false;
+
+            return true;
+        }
     </script>
         % if 'loginSuccess' in dir() and loginSuccess == False:
             <div class="alert alert-danger" id="validateError">用户名或密码错误</div>

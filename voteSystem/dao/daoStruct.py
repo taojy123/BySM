@@ -6,8 +6,23 @@ DaoStruct = {
     'userName':str,
     'userType':int,
     'regTime':int,
-    'remark':str,
     'seqKey':int,
+    'shenfenzheng':str,
+    'shengri':int,
+    'sex':int,
+    'zhicheng':str,
+    'zhichengLv':str,
+    'zhiwu':str,
+    'zuigaoxueli':str,
+    'remark':str,
+#--------∆¿ŒØ-------------
+    'jianjie':str,
+#--------≤Œ∆¿»À-----------
+    'biyeyuanxiao':str,
+    'ruzhishijian':int,
+    'zhuyaojingli':str,
+    'xueshuchengguo':str,
+    'huojiangxinxi':str
 },
 
 'VoteItemDao':{

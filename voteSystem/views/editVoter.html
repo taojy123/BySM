@@ -1,5 +1,10 @@
+% if 'isVoter' in dir():
+% rebase('views/voterBase.html')
+% actionAdd = '/voter/editVoterData'
+% else:
 % rebase('views/adminBase.html')
-
+% actionAdd = '/admin/editVoterData'
+% end
 % from common import shareDefine
 
 % if userType == shareDefine.UserAccType_BeVoter:
@@ -15,36 +20,125 @@
             编辑{{adminName}}信息
     </h2>
 
-    <form action="/admin/editVoterData" method="POST" class="form-horizontal" enctype="multipart/form-data">
+    <div class="alert alert-info" hidden="true" id="alertInfo"></div>
+
+    <form action="{{actionAdd}}" method="POST" class="form-horizontal" enctype="multipart/form-data">
 
         <input type="hidden" name="voterName" value="{{userAccDao.userAcc}}"/>
 
         <input type="hidden" name="userType" value="{{userType}}"/>
 
         <div class="form-group">
-            <label class="col-sm-1 control-label" >用户名</label>
+            <label class="col-sm-1 col-sm-offset-1 control-label" >工作证号</label>
             <label class="col-sm-1 control-label" style="text-align: left">{{userAccDao.userAcc}}</label>
         </div>
 
+        % if 'noPsw' not in dir():
         <div class="form-group">
-            <label  class="col-sm-1 control-label" >密码</label>
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >密码</label>
             <input type="text" class="form-control" name="voterPsw" value="{{userAccDao.userPsw}}">
             <label class="alert alert-danger control-label" id="passwordValiDate" hidden="true"></label>
         </div>
+        % end
 
         <div class="form-group">
-            <label  class="col-sm-1 control-label" >姓名</label>
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >姓名</label>
             <input type="text" class="form-control" name="name" value="{{userAccDao.userName}}">
         </div>
 
         <div class="form-group">
-            <label  class="col-sm-1 control-label" >备注</label>
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >身份证</label>
+            <input type="text" class="form-control" name="shenfenzheng" id="shenfenzheng" value="{{userAccDao.shenfenzheng}}">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >出生年月</label>
+            <input type="text" class="form-control" name="shengri" id="shengri" value="" placeholder="yyyy-mm-dd">
+            <script>
+                var time = serverMilliSecToStr({{userAccDao.shengri}});
+                $("#shengri").val(time.split(' ')[0]);
+            </script>
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >性别</label>
+            <div class="col-sm-4">
+                % checked1 = ""
+                % checked2 = ""
+                % if int(userAccDao.sex) == 1:
+                %   checked1 = 'checked'
+                % else:
+                %   checked2 = 'checked'
+                % end
+                <input type="radio" name="sex" value="1" {{checked1}}><label class="control-label">男&nbsp;&nbsp;</label><input type="radio" name="sex" value="2" {{checked2}}><label class="control-label">女</label>
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >职称</label>
+            <input type="text" class="form-control" name="zhicheng" value="{{userAccDao.zhicheng}}">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >职称等级</label>
+            <input type="text" class="form-control" name="zhichengLv" value="{{userAccDao.zhichengLv}}">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >职务</label>
+            <input type="text" class="form-control" name="zhiwu" value="{{userAccDao.zhiwu}}">
+        </div>
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >最高学历</label>
+            <input type="text" class="form-control" name="zuigaoxueli" value="{{userAccDao.zuigaoxueli}}">
+        </div>
+        % if userType != shareDefine.UserAccType_BeVoter:
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >简介</label>
+                <textarea class="form-control" name="jianjie" style="width: 60%;" maxlength="200">{{userAccDao.jianjie}}</textarea>
+             </div>
+
+        % else:
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >毕业院校</label>
+                <input type="text" class="form-control" name="biyeyuanxiao" value="{{userAccDao.biyeyuanxiao}}">
+             </div>
+
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >入职时间</label>
+                <input type="text" class="form-control" name="ruzhishijian" value="" id="ruzhishijian" placeholder="yyyy-mm-dd">
+                <script>
+                    var time = serverMilliSecToStr({{userAccDao.ruzhishijian}});
+                    $("#ruzhishijian").val(time.split(' ')[0]);
+                </script>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >主要经历</label>
+                <textarea class="form-control" name="zhuyaojingli" style="width: 60%;" maxlength="200">{{userAccDao.zhuyaojingli}}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >学术成果</label>
+                <textarea class="form-control" name="xueshuchengguo" style="width: 60%;" maxlength="200">{{userAccDao.xueshuchengguo}}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-1 col-sm-offset-1 control-label" >获奖信息</label>
+                <textarea class="form-control" name="huojiangxinxi" style="width: 60%;" maxlength="200">{{userAccDao.huojiangxinxi}}</textarea>
+            </div>
+        % end
+
+        <div class="form-group">
+            <label  class="col-sm-1 col-sm-offset-1 control-label" >备注</label>
             <textarea class="form-control" name="remark" style="width: 60%;" maxlength="200">{{userAccDao.remark}}</textarea>
         </div>
 
         <div class="form-group">
             <label  class="col-sm-1 control-label"></label>
-            <button type="submit" class="btn btn-success" onclick="return userPswValiDate()">提交</button>
+            <button type="submit" class="btn btn-success col-sm-offset-1" onclick="return validateVoterInfo(false)">提交</button>
         </div>
 
     </form>
@@ -52,5 +146,8 @@
 </div>
 
 <script>
-        $("#userInfoMgr").addClass('active')
+        $("#editVoter").addClass('active')
+    % if 'success' in dir():
+        alert('修改成功')
+    % end
 </script>

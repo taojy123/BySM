@@ -86,17 +86,13 @@ class AdminOper(OperBase):
         if userAccDao.hasData():
             return self.responseTemplate(tplName='addVoter', userNameExist=True, userType=userType)
 
-        name = request.forms.get('name')
-        remark = request.forms.get('remark')
-        if len(remark) > 200:
-            remark = remark[:200]
-
         userAccDao.userAcc = userName
         userAccDao.userPsw = commonFunc.GetRandomStr()
-        userAccDao.userName = name
         userAccDao.userType = userType
         userAccDao.regTime = commonFunc.GetIntMillisecond()
-        userAccDao.remark = remark
+
+        self.setAddData(request, userAccDao)
+
         userAccDao.seqKey = self.getNextSeq('UserAccSeq')
         userAccDao.saveData()
 
@@ -121,18 +117,6 @@ class AdminOper(OperBase):
 
         return self.responseTemplate(userAccDao=userAccDao, userType=self.getIntUserType(request, False))
 
-    def getIntUserType(self, request, isPost=True):
-        if isPost:
-            userType = request.forms.get('userType')
-        else:
-            userType = request.GET.get('userType')
-
-        if userType == None:
-            userType = shareDefine.UserAccType_Voter
-
-        userType = int(userType)
-        return userType
-
     @validate_admin_login_decorator
     def editVoterData(self, request):
         userName = request.forms.get('voterName')
@@ -140,14 +124,8 @@ class AdminOper(OperBase):
         if userName and voterPsw:
             userAccDao = UserAccDao(userName)
             if userAccDao.hasData():
-                name = request.forms.get('name')
-                remark = request.forms.get('remark')
-                if len(remark) > 200:
-                    remark = remark[:200]
-
+                self.setAddData(request, userAccDao)
                 userAccDao.userPsw = voterPsw
-                userAccDao.userName = name
-                userAccDao.remark = remark
                 userAccDao.saveData()
 
         userType = self.getIntUserType(request)

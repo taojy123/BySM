@@ -10,7 +10,7 @@
     <form id="form" action="/voter/voterLoginValidate" method="POST" class="form-horizontal">
 
         <div class="form-group">
-            <label  class="col-sm-2 control-label" >用户名:</label>
+            <label  class="col-sm-2 control-label" >工作证号:</label>
             <input type="text" class="form-control"  style="display:inline;width:auto;" name="username" >
             <label class="alert alert-danger control-label" id="userNameValidate" hidden="true"></label>
         </div>
@@ -32,7 +32,7 @@
         $("#switchLogin").addClass('active')
     </script>
         % if 'loginSuccess' in dir() and loginSuccess == False:
-            <div class="alert alert-danger" id="validateError">用户名或密码错误</div>
+            <div class="alert alert-danger" id="validateError">工作证号或密码错误</div>
             <script>
                 var delayHidden = function(){
                     setTimeout('document.getElementById("validateError").hidden = true', 3000);

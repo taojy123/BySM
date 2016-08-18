@@ -289,6 +289,22 @@ class VoterOper(OperBase):
         return col.find_one()['voteKeyList']
 
     @validate_admin_login_decorator
+    def editVoter(self, request):
+        userAcc = self.getUserAcc(request)
+        userData = UserAccDao(userAcc)
+        return self.responseTemplate(userAccDao=userData, userType=shareDefine.UserAccType_Voter, isVoter=True, noPsw=True)
+
+    @validate_admin_login_decorator
+    def editVoterData(self, request):
+        userAcc = self.getUserAcc(request)
+        userData = UserAccDao(userAcc)
+
+        self.setAddData(request, userData)
+        userData.saveData()
+
+        return self.responseTemplate(tplName="editVoter", userAccDao=userData, userType=shareDefine.UserAccType_Voter, isVoter=True, success=True, noPsw=True)
+
+    @validate_admin_login_decorator
     def changePsw(self, request):
         return self.responseTemplate()
 
@@ -296,8 +312,7 @@ class VoterOper(OperBase):
     def doChangePsw(self, request):
         userAcc = self.getUserAcc(request)
         userData = UserAccDao(userAcc)
-        print userData.userPsw
-        print request.POST.get('passwordOld')
+
         if userData.userPsw != request.POST.get('passwordOld'):
             return self.responseTemplate(tplName='changePsw', oldPswErr=True)
 

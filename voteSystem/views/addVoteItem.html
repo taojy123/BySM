@@ -203,7 +203,9 @@
         if(!accListPro('#selectedVoterList', '#voterListStr', '请选择评委')) return false;
         if(!accListPro('#selectedBeVoterList', '#beVoterListStr', '请选择参评人')) return false;
 
-        if(!dateValidate()) return false;
+
+        if(!checkNoInput('#endTime', '截止时间')) return false;
+        if(!dateValidate('#endTime')) return false;
 
         if({{primary}} != 0){
             return confirm("确定修改投票项目?修改将重置投票数据!");
@@ -222,35 +224,6 @@
         return true;
     }
 
-    var checkNoInput = function(id, affirmName, checkIsNaN){
-        var value = $(id).val();
-        var valueLen = value.length;
-
-        if(!valueLen){
-            showAffirm('请输入' + affirmName);
-            return false;
-        }
-
-        if(checkIsNaN){
-            var isString = isNaN(value);
-            if(isString){
-                showAffirm(affirmName + '请输入数字');
-                return false;
-            }else if(parseInt(value) == 0){
-                showAffirm(affirmName + '不能为0');
-                return false;
-            }
-        }
-
-        return true;
-    };
-
-    var showAffirm = function(affirm){
-        if(!affirm) return;
-        $('#alertInfo').attr('hidden', false);
-        $('#alertInfo').html(affirm);
-    }
-
     var selectedAccList = function(id){
         var children = $(id).children();
         var accList = [];
@@ -262,25 +235,6 @@
         }
         return accList;
     }
-
-    var dateValidate = function(){
-        if(!checkNoInput('#endTime', '请输入时间')) return false;
-        var dateStr = $('#endTime').val();
-        var regExp = /^(\d{4})\-(\d{2})\-(\d{2})$/;
-
-        if(!regExp.test(dateStr)){
-            showAffirm('截止日期格式请按照yyyy-mm-dd格式输入');
-            return false;
-        }
-
-        var year = dateStr.split('-')[0];
-        if(year < 1970){
-            showAffirm('年份不能小于1970年');
-            return false;
-        }
-
-        return true;
-    };
 
     var addVoteInfoList = function(userAcc, userName, selectedID, noselected){
         if(userName == '') userName = '未设置名字';
