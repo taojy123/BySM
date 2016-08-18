@@ -497,14 +497,16 @@ class AdminOper(OperBase):
 
         return self.responseTemplate(tplName='changeAdminPsw', oldPswErr=oldPswErr, changeSuccess=changeSuccess)
 
-    @validate_admin_login_decorator
     def findVoteItemTable(self, request):
         keywordYear = request.GET.get('keywordYear')
         keywordName = request.GET.get('keywordName')
         return self.voteRecTable(request, keywordYear, keywordName)
 
-    @validate_admin_login_decorator
     def voteRecTable(self, request, keywordYear='', keywordName=''):
+        isAdmin = False
+        session = request.environ.get('beaker.session')
+        if session.has_key('adminName'):
+            isAdmin = True
         infoList = []
         searchDict = {}
         if keywordYear:
@@ -529,8 +531,10 @@ class AdminOper(OperBase):
 
             beVoterList = []
             passBeVoterList = []
+            beVoterTicketDict = {}
             for beVoterAcc, beVoterTicket in colData['beVoterInfoDict'].iteritems():
                 beVoterName = UserAccDao(beVoterAcc).userName
+                beVoterTicketDict[beVoterAcc] = [beVoterName, beVoterTicket]
                 beVoterList.append(beVoterName)
                 if beVoterTicket >= colData['beVoterPassCnt']:
                     passBeVoterList.append(beVoterName)
@@ -544,8 +548,9 @@ class AdminOper(OperBase):
                 'beVoterPassCnt':colData['beVoterPassCnt'],
                 'hasTicketVoterList':hasTicketVoterList,
                 'passBeVoterList':passBeVoterList,
-                'endTime':colData['endTime']
+                'endTime':colData['endTime'],
+                'beVoterTicketDict':beVoterTicketDict,
             }
             infoList.append(dataObj)
 
-        return self.responseTemplate(infoList=infoList, keywordYear=keywordYear, keywordName=keywordName)
+        return self.responseTemplate(infoList=infoList, keywordYear=keywordYear, keywordName=keywordName, isAdmin=isAdmin)

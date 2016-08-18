@@ -16,6 +16,12 @@ def validate_admin_login_decorator(fun):
         return fun(self, request, *args, **kwargs)
     return wrapper
 
+def validate_beVoter_login_decorator(fun):
+    def wrapper(self, request, *args, **kwargs):
+        if not self.validateBeVoterLogin(request):
+            return self.redirectbeVoterLogin()
+        return fun(self, request, *args, **kwargs)
+    return wrapper
 
 class VoterOper(OperBase):
     def __init__(self):
@@ -32,6 +38,15 @@ class VoterOper(OperBase):
         session = request.environ.get('beaker.session')
         sessionVoterName = session.get('voterName', None)
         sessionVoterPsw = session.get('voterPsw', None)
+        if sessionVoterName and sessionVoterPsw:
+            return True
+
+        return False
+
+    def validateBeVoterLogin(self, request):
+        session = request.environ.get('beaker.session')
+        sessionVoterName = session.get('beVoterName', None)
+        sessionVoterPsw = session.get('beVoterPsw', None)
         if sessionVoterName and sessionVoterPsw:
             return True
 
@@ -321,3 +336,75 @@ class VoterOper(OperBase):
 
         return self.responseTemplate(tplName='changePsw', changeSuccess=True)
 
+
+
+
+
+#---------------------------------------≤Œ∆¿»À-------------------------------------------
+
+    def beVoterLogin(self, request):
+        return self.responseTemplate()
+
+    def beVoterLoginValidate(self, request):
+        userName = request.forms.get('username')
+        password = request.forms.get('password')
+        loginSuccess = False
+
+        userData = UserAccDao(userName);
+        if userData.hasData() and userData.userPsw == password and userData.userType == shareDefine.UserAccType_BeVoter:
+            loginSuccess = True
+            session = request.environ.get('beaker.session')
+            session['beVoterName'] = userName
+            session['beVoterPsw'] = password
+
+            return self.editBeVoter(request)
+
+        return self.responseTemplate(tplName='beVoterLogin', loginSuccess=loginSuccess)
+
+    @validate_beVoter_login_decorator
+    def editBeVoter(self, request):
+        userAcc = self.getBeVoterAcc(request)
+        userData = UserAccDao(userAcc)
+        return self.responseTemplate(tplName='editVoter', userAccDao=userData, userType=shareDefine.UserAccType_BeVoter, isBeVoter=True, noPsw=True)
+
+    def getBeVoterAcc(self, request):
+        session = request.environ.get('beaker.session')
+        return session['beVoterName']
+
+    @validate_beVoter_login_decorator
+    def editBeVoterData(self, request):
+        userAcc = self.getBeVoterAcc(request)
+        userData = UserAccDao(userAcc)
+
+        self.setAddData(request, userData)
+        userData.saveData()
+
+        return self.responseTemplate(tplName="editVoter", userAccDao=userData, userType=shareDefine.UserAccType_BeVoter,
+                                     isBeVoter=True, success=True, noPsw=True)
+
+    @validate_beVoter_login_decorator
+    def changeBeVoterPsw(self, request):
+        return self.responseTemplate(tplName='changePsw', isBeVoter=True)
+
+    @validate_beVoter_login_decorator
+    def doChangeBeVoterPsw(self, request):
+        userAcc = self.getBeVoterAcc(request)
+        userData = UserAccDao(userAcc)
+
+        if userData.userPsw != request.POST.get('passwordOld'):
+            return self.responseTemplate(tplName='changePsw', isBeVoter=True, oldPswErr=True)
+
+        userData.userPsw = request.POST.get('passwordNew')
+        userData.saveData()
+
+        return self.responseTemplate(tplName='changePsw', changeSuccess=True, isBeVoter=True)
+
+    @validate_beVoter_login_decorator
+    def beVoterLoginOut(self, request):
+        session = request.environ.get('beaker.session')
+        del session['beVoterName']
+        del session['beVoterPsw']
+        return self.redirectbeVoterLogin()
+
+    def redirectbeVoterLogin(self):
+        return redirect('/voter/beVoterLogin')

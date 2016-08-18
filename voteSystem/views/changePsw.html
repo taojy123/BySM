@@ -1,4 +1,10 @@
+% if 'isBeVoter' in dir():
+% rebase('views/beVoterBase.html')
+% postAddr = 'doChangeBeVoterPsw'
+% else:
 % rebase('views/voterBase.html')
+% postAddr = 'doChangePsw'
+% end
 
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
@@ -7,7 +13,7 @@
 
     <div class="alert alert-info" hidden="true" id="alertInfo"></div>
 
-    <form id="form" action="/voter/doChangePsw" method="POST" class="form-horizontal">
+    <form id="form" action="/voter/{{postAddr}}" method="POST" class="form-horizontal">
 
         <div class="form-group">
             <label  class="col-sm-2 control-label" >旧密码:</label>

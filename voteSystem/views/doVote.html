@@ -1,5 +1,10 @@
 % rebase('views/voterBase.html')
+<style>
+    .table-bordered > tbody > tr > td {
+      border: 1px solid #000000;  /* 单元格边框 */
+    }
 
+</style>
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
     <div class="container theme-showcase col-sm-12" role="main">
@@ -38,14 +43,89 @@
                                 <a class="btn btn-xs btn-primary voterInfo" data-id="voter{{index}}" >显示详情</a>
                             </div>
                             <div hidden="true" id="voter{{index}}">
-                                <label>姓名:{{beVoterInfo.userName}}</label><br/>
-                                <label>所得票数:{{beVoterInfo.beVoteTicket}}</label><br/>
-                                <label>备注:{{beVoterInfo.remark}}</label><br/>
-                                <label id="voterRegTime{{index}}">
-                                    <script>
-                                        $('#voterRegTime{{index}}').html('注册时间:' + serverMilliSecToStr({{beVoterInfo.regTime}}))
-                                    </script>
-                                </label><br/>
+                                    <table id="table" data-page-size="50" class="table table-hover table-bordered" data-pagination="true" data-page-list="[10,50,500,2000,10000]" data-pagination="true">
+                                        <tr>
+                                            <td>姓名</td>
+                                            <td>{{beVoterInfo.userName}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>所得票数</td>
+                                            <td>{{beVoterInfo.beVoteTicket}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>身份证</td>
+                                            <td>{{beVoterInfo.shenfenzheng}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>出生年月</td>
+                                            <td id="votershengri{{index}}">
+                                                % if beVoterInfo.shengri:
+                                                 <script>
+                                                     var time = serverMilliSecToStr({{beVoterInfo.shengri}});
+                                                    $('#votershengri{{index}}').html(time.split(' ')[0])
+                                                </script>
+                                                % end
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>性别</td>
+                                            <td>
+                                                % if int(beVoterInfo.sex) == 1:
+                                                    男
+                                                % else:
+                                                    女
+                                                % end
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>职称</td>
+                                            <td>{{beVoterInfo.zhicheng}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>职称等级</td>
+                                            <td>{{beVoterInfo.zhichengLv}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>职务</td>
+                                            <td>{{beVoterInfo.zhiwu}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>最高学历</td>
+                                            <td>{{beVoterInfo.zuigaoxueli}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>毕业学校</td>
+                                            <td>{{beVoterInfo.biyeyuanxiao}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>入职时间</td>
+                                            <td id="voterruzhishijian{{index}}">
+                                                % if beVoterInfo.ruzhishijian:
+                                                 <script>
+                                                     var time = serverMilliSecToStr({{beVoterInfo.ruzhishijian}});
+
+                                                    $('#voterruzhishijian{{index}}').html(time.split(' ')[0])
+                                                </script>
+                                                % end
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>主要经历</td>
+                                            <td>{{beVoterInfo.zhuyaojingli}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>学术成果</td>
+                                            <td>{{beVoterInfo.xueshuchengguo}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>获奖信息</td>
+                                            <td>{{beVoterInfo.huojiangxinxi}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>备注</td>
+                                            <td>{{beVoterInfo.remark}}</td>
+                                        </tr>
+                                    </table>
                             </div>
                       % end
 

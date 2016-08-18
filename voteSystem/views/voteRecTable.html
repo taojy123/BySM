@@ -1,6 +1,13 @@
+% if isAdmin:
 % rebase('views/adminBase.html')
-
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+% offset1 = 'col-sm-offset-3'
+% offset2 = 'col-md-offset-2'
+% else:
+% rebase('views/guestBase.html')
+% offset1 = ''
+% offset2 = ''
+% end
+<div class="col-sm-9 {{offset1}} col-md-10 {{offset2}} main">
 
     <h2 class="sub-header">投票项目汇总</h2>
 
@@ -36,12 +43,13 @@
             <tr>
                 <th data-sortable="true">立项时间</th>
                 <th data-sortable="true">年度</th>
-                <th data-sortable="true">投票项目名称</th>
+                <th data-sortable="true">项目名称</th>
                 <th data-sortable="true">评委列表</th>
                 <th data-sortable="true">参评人列表</th>
-                <th data-sortable="true">未完成投票评委列表</th>
-                <th data-sortable="true">通过项目参评人列表</th>
-                <th data-sortable="true">投票通过指标</th>
+                <th data-sortable="true">未完成投票评委</th>
+                <th data-sortable="true">通过指标参评人</th>
+                <th data-sortable="true">通过指标</th>
+                <th data-sortable="true">票数列表</th>
                 <th data-sortable="true">项目截止时间</th>
             </tr>
         </thead>
@@ -52,7 +60,7 @@
                     <td data-sortable="true" id="{{voterData['addVoteTime']}}">
                         <script>
                             var time = serverMilliSecToStr('{{voterData["addVoteTime"]}}');
-                            $('#{{voterData["addVoteTime"]}}').html(time);
+                            $('#{{voterData["addVoteTime"]}}').html(time.split(' ')[0]);
                         </script>
                     </td>
                     <td data-sortable="true">{{voterData['year']}}</td>
@@ -102,10 +110,22 @@
                         </select>
                     </td>
                     <td data-sortable="true">{{voterData['beVoterPassCnt']}}</td>
+                    <td data-sortable="true">
+                        <select class="form-control">
+                            % index = 0
+                            % for userAcc, beVoterInfo in voterData['beVoterTicketDict'].iteritems():
+                            % if index == 0:
+                                <option selected>{{beVoterInfo[0]}}({{userAcc}}) {{beVoterInfo[1]}}票</option>
+                            %   index += 1
+                            % else:
+                                <option>{{beVoterInfo[0]}}({{userAcc}}) {{beVoterInfo[1]}}票</option>
+                            % end
+                            % end
+                        </select>
+                    </td>
                     <td data-sortable="true" id="{{num}}{{voterData['endTime']}}">
                         <script>
                             var time = serverMilliSecToStr('{{voterData["endTime"]}}');
-                            % print index
                             $('#{{num}}{{voterData["endTime"]}}').html(time);
                         </script>
                     </td>

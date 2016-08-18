@@ -1,6 +1,9 @@
 % if 'isVoter' in dir():
 % rebase('views/voterBase.html')
 % actionAdd = '/voter/editVoterData'
+% elif 'isBeVoter' in dir():
+% rebase('views/beVoterBase.html')
+% actionAdd = '/voter/editBeVoterData'
 % else:
 % rebase('views/adminBase.html')
 % actionAdd = '/admin/editVoterData'
@@ -54,10 +57,12 @@
         <div class="form-group">
             <label  class="col-sm-1 col-sm-offset-1 control-label" >出生年月</label>
             <input type="text" class="form-control" name="shengri" id="shengri" value="" placeholder="yyyy-mm-dd">
-            <script>
-                var time = serverMilliSecToStr({{userAccDao.shengri}});
-                $("#shengri").val(time.split(' ')[0]);
-            </script>
+            % if userAccDao.shengri:
+                <script>
+                    var time = serverMilliSecToStr({{userAccDao.shengri}});
+                    $("#shengri").val(time.split(' ')[0]);
+                </script>
+            % end
         </div>
 
         <div class="form-group">
@@ -109,10 +114,12 @@
             <div class="form-group">
                 <label  class="col-sm-1 col-sm-offset-1 control-label" >入职时间</label>
                 <input type="text" class="form-control" name="ruzhishijian" value="" id="ruzhishijian" placeholder="yyyy-mm-dd">
-                <script>
-                    var time = serverMilliSecToStr({{userAccDao.ruzhishijian}});
-                    $("#ruzhishijian").val(time.split(' ')[0]);
-                </script>
+                % if userAccDao.ruzhishijian:
+                    <script>
+                        var time = serverMilliSecToStr({{userAccDao.ruzhishijian}});
+                        $("#ruzhishijian").val(time.split(' ')[0]);
+                    </script>
+                % end
             </div>
 
             <div class="form-group">

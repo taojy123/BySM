@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>投票系统</title>
+
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-table.css" rel="stylesheet"/>
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <link href="/static/css/jquery.searchableSelect.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-datetimepicker.css" rel="stylesheet">
+    <link href="/static/css/menu.css" rel="stylesheet">
+
+    <script src="/static/js/jquery-1.10.2.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap-table.js"></script>
+    <script src="/static/js/jquery.searchableSelect.js"></script>
+    <script src="/static/js/bootstrap-datetimepicker.js"></script>
+    <script src="/static/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script src="/static/myJs/lengthValidate.js"></script>
+    <script src="/static/myJs/timeOper.js"></script>
+    <style>
+        .form-control{
+            display:inline;
+            width:auto;
+        }
+        .form-group{
+            white-space:nowrap;
+        }
+        .form_datetime{
+            float: left;
+        }
+        
+            .staff_required{
+                display: none !important;
+            }
+    </style>
+    % from bottle import request
+    % session = request.environ.get('beaker.session')
+    % sessionVoterName = session.get('beVoterName', None)
+    % sessionVoterPsw = session.get('beVoterPsw', None)
+    % if sessionVoterName and sessionVoterPsw:
+    %     isLogin = True
+    % else:
+    %     isLogin = False
+    % end
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">投票系统</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">欢迎{{sessionVoterName}}</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li id="editVoter" style="text-align: center"><a href="/voter/editBeVoter">修改信息</a></li>
+                <li id="changePsw" style="text-align: center"><a href="/voter/changeBeVoterPsw">修改密码</a></li>
+                % if isLogin:
+                %   loginAdd = '/voter/beVoterLoginOut'
+                %   loginName = '退出系统'
+                % else:
+                %   loginAdd = '/voter/beVoterLogin'
+                %   loginName = '登录系统'
+                % end
+                <li id="switchLogin" style="text-align: center"><a href={{loginAdd}}>{{loginName}}</a></li>
+            </ul>
+        </div>
+
+        {{!base}}
+
+    </div>
+</div>
+
+<script>
+    $('.search').searchableSelect();
+
+    $(".form_datetime").datetimepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        todayBtn: true,
+        minView: 2,
+        language: 'zh-CN'
+    });
+</script>
+
+
+
+
+</body>
+</html>
