@@ -111,6 +111,7 @@ def output():
 
 app = beaker.middleware.SessionMiddleware(bottle.app(), configReader.GetSystemConfig().session_opts)
 
+bottle.debug(True)
 
 if '__main__' == __name__:
     bottle.TEMPLATES.clear()
