@@ -155,6 +155,6 @@ var fileValiDate = function(){
          alert("excel文件限于xls,xlsx格式");
          return false;
      }
-    $('.main').html('导入中...')
+    //$('.main').html('导入中...')
     return true;
 }

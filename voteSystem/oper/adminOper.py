@@ -620,9 +620,11 @@ class AdminOper(OperBase):
                 errorInfo.append(self.getErrMsg(line, '工作证号已存在'))
                 continue
 
+
             userAccDao.seqKey = self.getNextSeq('UserAccSeq')
             userAccDao.userAcc = userAcc
             userAccDao.userName = userName
+            userAccDao.sex = 1
             userAccDao.userPsw = userPsw
             userAccDao.userType = userType
             userAccDao.regTime = commonFunc.GetIntMillisecond()
