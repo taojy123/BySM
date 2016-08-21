@@ -25,6 +25,9 @@
         <button type="submit" class="btn btn-success">导出表格</button>
     </form>
     <br/>
+        <a href="/admin/voterInputPage?userType={{userType}}"><button type="submit" class="btn btn-success">导入表格</button></a>
+    <br/>
+    <br/>
     <form action="/admin/findVoterData" method="get" class="col-sm-1 form-horizontal">
 
         <input type="hidden" name="userType" value="{{userType}}"/>
@@ -89,4 +92,8 @@
                 top.location.href = '/admin/deleteVoterData?userAcc=' + id + '&userType={{userType}}';
             }
         });
+        % if errorInfo:
+            var msg = '{{errorInfo}}';
+            alert(msg)
+        % end
 </script>

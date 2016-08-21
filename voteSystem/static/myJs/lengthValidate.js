@@ -140,3 +140,21 @@ var showAffirm = function(affirm){
     $('#alertInfo').attr('hidden', false);
     $('#alertInfo').html(affirm);
 }
+
+var fileValiDate = function(){
+     var filepath = $("input[name='file']").val();
+    console.log(filepath)
+     if(!filepath){
+         alert('请先选择excel文件再导入')
+         return false;
+     }
+
+     var extStart = filepath.lastIndexOf(".");
+     var ext = filepath.substring(extStart, filepath.length).toUpperCase();
+     if (ext != ".XLS" && ext != ".XLSX") {
+         alert("excel文件限于xls,xlsx格式");
+         return false;
+     }
+    $('.main').html('导入中...')
+    return true;
+}

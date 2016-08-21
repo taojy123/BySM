@@ -1,6 +1,8 @@
 import time
 import configReader
 from random import Random
+import xlrd
+import os
 
 def GetIntMillisecond():
     return int(time.time())
@@ -32,3 +34,23 @@ def GetFormatStrByIntMillisecond(timeStamp):
     formatStr = time.strftime("%Y-%m-%d", timeArray)
     # %Y-%m-%d %H:%M:%S
     return formatStr
+
+def ReadExcel(fileName, removeFile=False):
+    dataList = []
+    workbook = xlrd.open_workbook(fileName)
+    sheet1 = workbook.sheet_by_index(0)
+    if sheet1.nrows == 0:
+        return dataList
+
+    for i in range(sheet1.nrows):
+        row = sheet1.row(i)
+        rowData = []
+        for j in range(sheet1.ncols):
+            rowData.append(row[j].value.encode('utf-8'))
+        dataList.append(rowData)
+
+    if os.path.exists(fileName) and removeFile:
+        os.remove(fileName)
+
+    return dataList
+

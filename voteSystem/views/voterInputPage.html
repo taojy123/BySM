@@ -1,0 +1,26 @@
+% rebase('views/adminBase.html')
+% from common import shareDefine
+% print userType
+% if 'userType' not in dir():
+%   userType = shareDefine.UserAccType_Voter
+% end
+
+% if userType == shareDefine.UserAccType_BeVoter:
+%   adminName = '参评人'
+% else:
+%   adminName = '评委'
+% end
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+            
+    <h2 class="sub-header">导入{{adminName}}</h2>
+    <form class="col-sm-0 input" action="/admin/voterInput" method="post" enctype='multipart/form-data'>
+        <input type="file" name="file"/>
+        <input type="hidden" name="userType" value="{{userType}}"/>
+        <br/>
+        <button type="submit" class="btn btn-success" onclick="return fileValiDate()">开始导入</button>
+    </form>
+    <br/>
+    <h4>导入说明</h4>
+    <img src="/static/img/import_img_desc.png"/>
+</div>

@@ -38,9 +38,9 @@
             <tr>
                 <th data-sortable="true">立项时间</th>
                 <th data-sortable="true">年度</th>
-                <th data-sortable="true">投票项目名称</th>
+                <th data-sortable="true">项目名称</th>
                 <th data-sortable="true">评委持票数</th>
-                <th data-sortable="true">投票通过指标</th>
+                <th data-sortable="true">通过指标</th>
                 <th data-sortable="true">是否匿名投票</th>
                 <th data-sortable="true">评委列表</th>
                 <th data-sortable="true">参评人列表</th>
@@ -99,6 +99,7 @@
                         <td data-sortable="true">
                             <a class="btn btn-xs btn-primary" href="/admin/editVoteItem?primary={{voteItemData['Primary']}}" >编辑</a>
                             <a class="btn btn-xs btn-danger exit" data-id="{{voteItemData['Primary']}}">删除</a>
+                            <a class="btn btn-xs btn-info" href="/admin/copyVoteItem?primary={{voteItemData['Primary']}}" >复制</a>
                         </td>
                     </tr>
                 % end
@@ -142,4 +143,7 @@
             $('#alertInfo').html(affirm);
         };
 
+        % if copySuccess == True:
+            alert('复制成功')
+        % end
 </script>

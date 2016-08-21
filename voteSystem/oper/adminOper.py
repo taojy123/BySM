@@ -158,7 +158,7 @@ class AdminOper(OperBase):
 
         return self.voterMgr(request, False, userType, colDataList, keyword)
 
-    def voterMgr(self, request, validate=True, userType=shareDefine.UserAccType_Voter, colDataList=None, keyword=''):
+    def voterMgr(self, request, validate=True, userType=shareDefine.UserAccType_Voter, colDataList=None, keyword='', errorInfo=None):
         if validate and not self.validateAdminLogin(request):
             return self.redirectLogin()
 
@@ -167,12 +167,12 @@ class AdminOper(OperBase):
             if colDataList.count() > 0:
                 colDataList.sort("regTime", -1)
 
-        return self.responseTemplate(userType=userType, dataList=list(colDataList), keyword=keyword)
+        return self.responseTemplate(userType=userType, dataList=list(colDataList), keyword=keyword, errorInfo=errorInfo)
 
     def beVoterMgr(self, request, validate=True):
         return self.voterMgr(request, validate=validate, userType=shareDefine.UserAccType_BeVoter)
 
-    def voteItemMgr(self, request, validate=True, colDataList=None, keywordYear='', keywordName=''):
+    def voteItemMgr(self, request, validate=True, colDataList=None, keywordYear='', keywordName='', copySuccess=False):
         if validate and not self.validateAdminLogin(request):
             return self.redirectLogin()
 
@@ -186,7 +186,39 @@ class AdminOper(OperBase):
         if colDataList.count() > 0:
             voterNameDict, beVoterNameDict = self.getVoteBeVoterNameDict()
 
-        return self.responseTemplate(dataList=list(colDataList), voterNameDict=voterNameDict, beVoterNameDict=beVoterNameDict, keywordYear=keywordYear, keywordName=keywordName)
+        return self.responseTemplate(dataList=list(colDataList), voterNameDict=voterNameDict, beVoterNameDict=beVoterNameDict,
+                                     keywordYear=keywordYear, keywordName=keywordName, copySuccess=copySuccess)
+
+    @validate_admin_login_decorator
+    def copyVoteItem(self, request):
+        primary = int(request.GET.get('primary'))
+        preVoteItemData = VoteItemDao(primary)
+        voteItemData = VoteItemDao('')
+
+        voteItemData.year = preVoteItemData.year
+        voteItemData.name = preVoteItemData.name
+        voteItemData.voterTicketCnt = preVoteItemData.voterTicketCnt
+        voteItemData.beVoterPassCnt = preVoteItemData.beVoterPassCnt
+        voteItemData.isUnSign = preVoteItemData.isUnSign
+        voteItemData.remark = preVoteItemData.remark
+        voteItemData.addVoteTime = commonFunc.GetIntMillisecond()
+        voteItemData.setPrimary(self.getNextSeq('VoteItemSeq'))
+
+        voterInfoDict = {}
+        for voterAcc in preVoteItemData.voterInfoDict.iterkeys():
+            voterDetailDict = {'voterLeftTicket': preVoteItemData.voterInfoDict[voterAcc]['voterLeftTicket'], 'voteRec': {}}
+            voterInfoDict[voterAcc] = voterDetailDict
+
+        beVoterInfoDict = {}
+        beVoterListStr = request.POST.get('beVoterListStr')
+        for beVoterAcc in preVoteItemData.beVoterInfoDict.iterkeys():
+            beVoterInfoDict[beVoterAcc] = 0
+
+        voteItemData.endTime = preVoteItemData.endTime
+        voteItemData.voterInfoDict = voterInfoDict
+        voteItemData.beVoterInfoDict = beVoterInfoDict
+        voteItemData.saveData()
+        return self.voteItemMgr(request, False, copySuccess=True)
 
     def getVoteBeVoterNameDict(self):
         voterNameDict = {}
@@ -554,3 +586,58 @@ class AdminOper(OperBase):
             infoList.append(dataObj)
 
         return self.responseTemplate(infoList=infoList, keywordYear=keywordYear, keywordName=keywordName, isAdmin=isAdmin)
+
+    @validate_admin_login_decorator
+    def voterInput(self, request):
+        uploadfile = request.POST.get('file')
+        userType = int(request.POST.get('userType'))
+        uploadfile.save('upload/', overwrite=True)
+
+        dataList = commonFunc.ReadExcel('upload/' + uploadfile.filename, True)
+        errorInfo = []
+        for index, dataInfo in enumerate(dataList):
+            line = index + 1
+            userAcc = dataInfo[0]
+            if not userAcc:
+                errorInfo.append(self.getErrMsg(line, '工作证号不能为空'))
+                continue
+            if len(userAcc) != 4:
+                errorInfo.append(self.getErrMsg(line, '工作证号：%s长度不为4'%userAcc))
+                continue
+
+            userName = dataInfo[1]
+            if not userName or len(userName) > 20:
+                errorInfo.append(self.getErrMsg(line, '姓名长度需要在1~20范围内'))
+                continue
+
+            userPsw = dataInfo[2]
+            if not userPsw or len(userPsw) > 20:
+                errorInfo.append(self.getErrMsg(line, '密码长度需要在1~20范围内'))
+                continue
+
+            userAccDao = UserAccDao(userAcc)
+            if userAccDao.hasData():
+                errorInfo.append(self.getErrMsg(line, '工作证号已存在'))
+                continue
+
+            userAccDao.seqKey = self.getNextSeq('UserAccSeq')
+            userAccDao.userAcc = userAcc
+            userAccDao.userName = userName
+            userAccDao.userPsw = userPsw
+            userAccDao.userType = userType
+            userAccDao.regTime = commonFunc.GetIntMillisecond()
+            userAccDao.saveData()
+
+        if len(errorInfo) == 0:
+            errorInfo.append('导入成功'.decode('gbk').encode('utf8'))
+
+        return self.voterMgr(request, validate=False, userType=userType, errorInfo='\\n'.join(errorInfo))
+
+    def getErrMsg(self, line, msg):
+        msgInfo = '第' + str(line) + '行:' + msg
+        return msgInfo.decode('gbk').encode('utf8')
+
+    @validate_admin_login_decorator
+    def voterInputPage(self, request):
+        userType = int(request.GET.get('userType'))
+        return self.responseTemplate(userType=userType)
