@@ -1,12 +1,15 @@
 # coding:GBK
+import StringIO
+import xlwt
 
 from operBase import OperBase
 from common.configReader import GetSystemConfig, ReLoadConfig
-from bottle import redirect
+from bottle import redirect, response
 from dao.userAccDao import UserAccDao
 from dao.voteItemDao import VoteItemDao
 from common import shareDefine, commonFunc, mongoDBCtrl
 import time
+
 
 def validate_admin_login_decorator(fun):
     def wrapper(self, request, *args, **kwargs):
@@ -219,6 +222,42 @@ class AdminOper(OperBase):
         voteItemData.beVoterInfoDict = beVoterInfoDict
         voteItemData.saveData()
         return self.voteItemMgr(request, False, copySuccess=True)
+
+    @validate_admin_login_decorator
+    def outputVoteItem(self, request):
+        primary = int(request.GET.get('primary'))
+        VoteItemData = VoteItemDao(primary)
+        voteItemData = VoteItemDao('')
+
+        name = VoteItemData.name
+        voterTicketCnt = VoteItemData.voterTicketCnt
+
+        voterNameDict, beVoterNameDict = self.getVoteBeVoterNameDict()
+        beVoterNames = beVoterNameDict[primary]
+
+        wb = xlwt.Workbook()
+        ws = wb.add_sheet('output')
+
+        ws.write(0, 0, u'%s 候选人名单' % name)
+        ws.write(1, 0, u'(共%s人, 选举%s人)' % (len(beVoterNames), voterTicketCnt))
+        ws.write(2, 0, u'姓名')
+        ws.write(2, 1, u'赞成○')
+        ws.write(2, 2, u'反对×')
+
+        j = 3
+        for beVoterName in beVoterNames:
+            ws.write(j, 0, beVoterName)
+            j += 1
+
+        s = StringIO.StringIO()
+        wb.save(s)
+        s.seek(0)
+        data = s.read()
+
+        response.headers['Content-Type'] = 'application/octet-stream'
+        response.headers['Content-Disposition'] = 'attachment;filename="vote.xls"'
+
+        return data
 
     def getVoteBeVoterNameDict(self):
         voterNameDict = {}
