@@ -18,8 +18,9 @@ def strip_path():
 
 
 @route('/')
+@view("views/index")
 def index():
-    redirect("/voter/voterLogin")
+    return locals()
 
 
 @route('/static/<filepath:path>')
